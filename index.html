@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Sveian bestilling + bar v2</title>
+  <style>
+    :root{
+      --bg:#12131a;--text:#f7f2ea;--muted:#c9c4d8;--line:rgba(255,255,255,.08);
+      --accent:#ff4fa3;--accent2:#ffd166;--green:#39d39f;--blue:#54bfff;--red:#ff6d8d;--orange:#ff9f4a;
+      --shadow:0 18px 40px rgba(0,0,0,.28);--radius:24px;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{margin:0;color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:radial-gradient(circle at top right,rgba(255,79,163,.18),transparent 26%),radial-gradient(circle at top left,rgba(127,107,255,.20),transparent 28%),linear-gradient(180deg,#220a2a 0px,var(--bg) 140px)}
+    .app{max-width:1220px;margin:0 auto;padding:18px 14px 140px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+    .brand{background:linear-gradient(135deg,rgba(127,107,255,.18),rgba(255,79,163,.16));border:1px solid rgba(255,255,255,.10);border-radius:28px;padding:18px;box-shadow:var(--shadow);flex:1;min-width:280px}
+    .brand h1{margin:0 0 6px;font-size:clamp(1.8rem,4vw,2.7rem);line-height:1.05}
+    .brand p{margin:0;color:var(--muted);line-height:1.35}
+    .nav{display:flex;gap:10px;flex-wrap:wrap}
+    .nav a{text-decoration:none;color:var(--text);padding:14px 18px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);font-weight:800;box-shadow:var(--shadow)}
+    .nav a.active{background:linear-gradient(135deg,var(--accent2),#ffba08);color:#2f1a00;border-color:transparent}
+    .layout{display:grid;grid-template-columns:1.5fr .92fr;gap:16px;align-items:start}
+    .panel{background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.05));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+    .panel h2{margin:0 0 12px;font-size:1.2rem}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+    .chip{border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.06);color:var(--text);border-radius:999px;padding:10px 14px;font-weight:800;cursor:pointer}
+    .chip.active{background:linear-gradient(135deg,var(--accent2),#ffba08);color:#2f1a00;border-color:transparent}
+    .search{flex:1;min-width:220px;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09)}
+    .search input{width:100%;border:0;background:transparent;color:var(--text);outline:none;font-size:1rem}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .card{position:relative;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.05));border-radius:24px;padding:16px 14px;min-height:152px;text-align:left;color:inherit;cursor:pointer;box-shadow:var(--shadow)}
+    .card:active{transform:scale(.98)}
+    .badge{position:absolute;top:12px;right:12px;min-width:38px;height:38px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 12px;font-weight:900;background:linear-gradient(135deg,var(--accent),#ff7d7d);color:#fff}
+    .icon{font-size:2.3rem;line-height:1;margin:10px 0 12px}.name{font-size:1.03rem;font-weight:900;line-height:1.15;margin-bottom:6px}.meta{color:var(--muted);font-size:.9rem;margin-bottom:12px}
+    .rowline{display:flex;justify-content:space-between;align-items:end;gap:10px}.price{color:var(--accent2);font-size:1.14rem;font-weight:900}.tap{color:var(--muted);font-size:.82rem}
+    .order-list{display:grid;gap:10px;max-height:390px;overflow:auto;margin-bottom:14px}
+    .empty{padding:16px;border:1px dashed rgba(255,255,255,.16);border-radius:18px;color:var(--muted);background:rgba(255,255,255,.04)}
+    .order-row{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;padding:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:18px}
+    .order-icon{font-size:1.6rem;text-align:center}.order-name{font-weight:900;margin-bottom:4px}.order-meta{color:var(--muted);font-size:.92rem}
+    .qty{display:inline-flex;align-items:center;gap:8px;margin-top:8px}
+    .qty button,.actions button,.status-actions button,.receipt-actions button,.top-actions button{border:0;cursor:pointer}
+    .qty button{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.10);color:#fff;font-size:1.15rem;font-weight:900}
+    .line-total{font-weight:900;white-space:nowrap}
+    .summary{display:grid;gap:10px;padding:16px;border-radius:20px;background:linear-gradient(135deg,rgba(255,79,163,.16),rgba(255,209,102,.14));border:1px solid rgba(255,255,255,.08);margin-bottom:14px}
+    .sumrow{display:flex;justify-content:space-between;gap:12px;color:var(--muted)}
+    .sumtotal{display:flex;justify-content:space-between;align-items:end;gap:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.12);font-weight:900}
+    .sumtotal strong{font-size:2rem;color:var(--accent2);line-height:1}
+    .actions,.receipt-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .actions button,.receipt-actions button,.status-actions button,.top-actions button{border-radius:16px;padding:14px;font-size:1rem;font-weight:900}
+    .ok{background:linear-gradient(135deg,var(--green),#5be8c0);color:#07261d}.blue{background:linear-gradient(135deg,#44c7ff,#5c7dff);color:#fff}.pink{background:linear-gradient(135deg,#ff6f91,#ff4f7d);color:#fff}.orange{background:linear-gradient(135deg,var(--accent),#ff7c66);color:#fff}.gray{background:rgba(255,255,255,.08);color:#fff}
+    .receipt{display:grid;gap:12px}.receipt-card{padding:18px;border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.08)}
+    .receipt-card h2{margin:0 0 8px;font-size:1.4rem}.receipt-card p{margin:0;color:var(--muted);line-height:1.4}
+    .receipt-meta{display:grid;gap:10px;margin-top:14px}.receipt-box{padding:14px;border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07)} .receipt-box strong{display:block;margin-bottom:4px}
+    .receipt-items{display:grid;gap:8px;margin-top:10px}.receipt-item{display:flex;justify-content:space-between;gap:10px}.tiny{color:var(--muted);font-size:.92rem}
+    .columns{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.status-col{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:14px;min-height:300px}
+    .status-col h3{margin:0 0 12px;font-size:1.06rem}
+    .ticket{padding:14px;border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);display:grid;gap:10px;margin-bottom:10px}
+    .ticket-top{display:flex;justify-content:space-between;align-items:start;gap:10px}.ticket-no{font-weight:900;font-size:1.06rem}.ticket-total{color:var(--accent2);font-weight:900;white-space:nowrap}
+    .ticket-items{display:grid;gap:6px;color:var(--muted);font-size:.92rem}.status-badge{display:inline-flex;align-items:center;padding:7px 10px;border-radius:999px;font-weight:800;font-size:.84rem}
+    .pending{background:rgba(255,159,74,.18);color:#ffd4a7}.paid{background:rgba(57,211,159,.18);color:#baf5df}.ready{background:rgba(84,191,255,.18);color:#d1f0ff}.expired{background:rgba(255,109,141,.18);color:#ffd1dc}
+    .status-actions{display:grid;gap:8px}.bar-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+    .counter{display:flex;gap:10px;flex-wrap:wrap}.counter .mini{padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--muted);font-size:.95rem}
+    .top-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .sticky{position:fixed;left:0;right:0;bottom:0;padding:12px 14px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(18,19,26,0),rgba(18,19,26,.85) 20%,rgba(18,19,26,1))}
+    .sticky-inner{max-width:1220px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px;background:rgba(44,34,66,.92);border:1px solid rgba(255,255,255,.10);border-radius:22px;padding:14px 16px;box-shadow:var(--shadow)}
+    .sticky-left{display:flex;gap:10px;align-items:center;color:#cdbfff;font-weight:900}.sticky-total{color:var(--accent2);font-weight:900;font-size:1.15rem}
+    .hidden{display:none!important}
+    .qr{display:grid;place-items:center;margin-top:12px}
+    .qr svg{background:#fff;border-radius:12px;padding:10px;max-width:160px;height:auto}
+    @media (max-width:1050px){.layout{grid-template-columns:1fr}.columns{grid-template-columns:1fr 1fr}}
+    @media (max-width:700px){.columns{grid-template-columns:1fr}}
+    @media (max-width:560px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.actions,.receipt-actions{grid-template-columns:1fr}.card{min-height:146px}.name{font-size:.98rem}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="brand">
+        <h1>Sveian festival</h1>
+        <p>Versjon 2 med utløp på ubetalte ordre, tydeligere digital kvittering, QR-kode for ordrenummer og barskjerm tilpasset høyere trafikk.</p>
+      </div>
+      <nav class="nav">
+        <a href="#/bestill" id="nav-bestill">Kundeside</a>
+        <a href="#/bar" id="nav-bar">Barskjerm</a>
+      </nav>
+    </div>
+
+    <section id="view-bestill" class="route hidden">
+      <div id="customer-step-order" class="layout">
+        <div class="panel">
+          <div class="toolbar">
+            <button class="chip active" data-cat="Alle">Alle</button>
+            <button class="chip" data-cat="Billetter">Billetter</button>
+            <button class="chip" data-cat="Merch">Merch</button>
+            <button class="chip" data-cat="Drikke">Drikke</button>
+            <button class="chip" data-cat="Mat">Mat</button>
+            <button class="chip" data-cat="Snacks">Snacks</button>
+            <button class="chip" data-cat="Tillegg">Tillegg</button>
+            <label class="search"><span>🔎</span><input id="searchInput" type="text" placeholder="Søk etter vare..." /></label>
+          </div>
+          <div id="productGrid" class="grid"></div>
+        </div>
+
+        <aside class="panel">
+          <h2>Din bestilling</h2>
+          <div id="cartList" class="order-list"></div>
+
+          <div class="summary">
+            <div class="sumrow"><span>Antall enheter</span><strong id="cartUnits">0</strong></div>
+            <div class="sumrow"><span>Ulike varer</span><strong id="cartUnique">0</strong></div>
+            <div class="sumtotal"><span>Totalt</span><strong id="cartTotal">0 kr</strong></div>
+          </div>
+
+          <div class="actions">
+            <button class="ok" id="placeOrderBtn" type="button">Bestill</button>
+            <button class="blue" id="undoBtn" type="button">Trekk fra siste</button>
+            <button class="pink" id="clearCartBtn" type="button">Nullstill</button>
+            <button class="orange" id="demoBtn" type="button">Demoordre</button>
+          </div>
+
+          <p class="tiny" style="margin-top:12px;">Ordren får status <strong>Venter på betaling</strong> og utløper automatisk etter <strong>5 minutter</strong> dersom den ikke blir markert som betalt i barskjermen.</p>
+        </aside>
+      </div>
+
+      <div id="customer-step-receipt" class="receipt hidden">
+        <div class="receipt-card">
+          <h2>Ordre registrert</h2>
+          <p>Vis ordrenummeret i baren hvis det trengs. Betalingen må sendes til Vipps før ordren blir laget.</p>
+          <div class="receipt-meta">
+            <div class="receipt-box"><strong>Ordrenummer</strong><div id="receiptOrderNo" style="font-size:1.8rem;font-weight:900;">#000</div></div>
+            <div class="receipt-box"><strong>Betal med Vipps</strong><div>Send beløpet til <strong>#966356</strong></div><div>Melding: <strong id="receiptMessageNo">000</strong></div><div id="receiptExpires" class="tiny" style="margin-top:6px;"></div></div>
+            <div class="receipt-box"><strong>Total</strong><div id="receiptTotal" style="font-size:1.3rem;font-weight:900;">0 kr</div></div>
+          </div>
+
+          <div class="qr"><div id="receiptQr"></div></div>
+
+          <div class="receipt-items" id="receiptItems"></div>
+
+          <div class="receipt-actions" style="margin-top:14px;">
+            <button class="ok" id="newOrderBtn" type="button">Ny bestilling</button>
+            <a class="gray" href="#/bar" style="text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;">Se barskjerm</a>
+          </div>
+
+          <p class="tiny" style="margin-top:12px;">QR-koden er ment som hurtigoppslag på ordrenummer. Barskjermen viser i tillegg tydelig hvilke varer som hører til ordren.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-bar" class="route hidden">
+      <div class="panel">
+        <div class="bar-top">
+          <div>
+            <h2 style="margin:0 0 6px;">Barskjerm</h2>
+            <div class="tiny">Flyt: <strong>Venter på betaling</strong> → <strong>Betalt</strong> → <strong>Klar/utlevert</strong>. Ubetalte ordre flyttes automatisk til <strong>Utløpt</strong> etter 5 minutter.</div>
+          </div>
+          <div class="counter">
+            <div class="mini">Nye: <strong id="countPending">0</strong></div>
+            <div class="mini">Betalt: <strong id="countPaid">0</strong></div>
+            <div class="mini">Klar: <strong id="countReady">0</strong></div>
+            <div class="mini">Utløpt: <strong id="countExpired">0</strong></div>
+          </div>
+          <div class="top-actions">
+            <button class="gray" id="clearExpiredBtn" type="button">Tøm utløpte</button>
+            <button class="gray" id="resetDemoBtn" type="button">Nullstill alle ordre</button>
+          </div>
+        </div>
+
+        <div class="columns">
+          <div class="status-col"><h3>Venter på betaling</h3><div id="pendingList"></div></div>
+          <div class="status-col"><h3>Betalt / under behandling</h3><div id="paidList"></div></div>
+          <div class="status-col"><h3>Klar / utlevert</h3><div id="readyList"></div></div>
+          <div class="status-col"><h3>Utløpt</h3><div id="expiredList"></div></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="sticky">
+    <div class="sticky-inner">
+      <div class="sticky-left"><span>🛒</span><span id="stickyCount">0 varer</span></div>
+      <div class="sticky-total" id="stickyTotal">Totalt: 0 kr</div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "sveian_orders_v2_demo";
+    const COUNTER_KEY = "sveian_order_counter_v2_demo";
+    const EXPIRY_MINUTES = 5;
+
+    const products = [
+      { id:"ticket", icon:"🎟️", name:"Inngangsbillett", price:475, category:"Billetter" },
+      { id:"shirt", icon:"👕", name:"T-skjorte", price:200, category:"Merch" },
+      { id:"glassfee", icon:"♻️", name:"Miljøavgift på glass", price:20, category:"Tillegg" },
+      { id:"dahls", icon:"🍺", name:"Dahls pils", price:90, category:"Drikke" },
+      { id:"juicyipa", icon:"🍻", name:"Frydenlund Juicy IPA", price:90, category:"Drikke" },
+      { id:"fatol", icon:"🍺", name:"Frydenlund fatøl", price:90, category:"Drikke" },
+      { id:"corona", icon:"🍺", name:"Corona", price:90, category:"Drikke" },
+      { id:"glutenfri", icon:"🍺", name:"Grans glutenfri ØL", price:90, category:"Drikke" },
+      { id:"smirnoff", icon:"🧊", name:"Smitnoff ICE", price:90, category:"Drikke" },
+      { id:"breezer", icon:"🍹", name:"Breezer", price:90, category:"Drikke" },
+      { id:"somersby", icon:"🍐", name:"Somersby Pære", price:90, category:"Drikke" },
+      { id:"rodvin", icon:"🍷", name:"Rødvin", price:90, category:"Drikke" },
+      { id:"hvitvin", icon:"🥂", name:"Hvitvin", price:90, category:"Drikke" },
+      { id:"gingerjoe", icon:"🫚", name:"Ginger Joe", price:90, category:"Drikke" },
+      { id:"shots", icon:"🥃", name:"Shots", price:50, category:"Drikke" },
+      { id:"slush", icon:"🥤", name:"Slush", price:40, category:"Drikke" },
+      { id:"brus", icon:"🥤", name:"Brus", price:35, category:"Drikke" },
+      { id:"kaffe", icon:"☕", name:"Kaffe", price:25, category:"Drikke" },
+      { id:"polse", icon:"🌭", name:"Pølse med brød", price:40, category:"Mat" },
+      { id:"vaffel", icon:"🧇", name:"Hel plate vaffel", price:40, category:"Mat" },
+      { id:"popcorn", icon:"🍿", name:"Popcorn", price:40, category:"Snacks" },
+      { id:"potetgull", icon:"🥔", name:"Potetgull", price:30, category:"Snacks" },
+      { id:"sukkerspinn", icon:"🍭", name:"Sukkerspinn", price:40, category:"Snacks" }
+    ];
+
+    let cart = {};
+    let lastAdded = null;
+    let activeCategory = "Alle";
+    let searchText = "";
+    let lastCreatedOrder = null;
+    let orders = loadOrders();
+
+    function formatKr(v){ return new Intl.NumberFormat("nb-NO").format(v) + " kr"; }
+    function loadOrders(){ try{ const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : []; } catch { return []; } }
+    function saveOrders(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(orders)); }
+    function nextOrderNo(){ let c = Number(localStorage.getItem(COUNTER_KEY) || "199"); c += 1; localStorage.setItem(COUNTER_KEY, String(c)); return c; }
+    function getCartCount(id){ return cart[id] || 0; }
+    function addToCart(id){ cart[id] = getCartCount(id) + 1; lastAdded = id; renderCustomer(); }
+    function changeCart(id,d){ cart[id] = Math.max(0, getCartCount(id) + d); if (cart[id] === 0) delete cart[id]; renderCustomer(); }
+    function clearCart(){ cart = {}; lastAdded = null; renderCustomer(); }
+    function undoLast(){ if (!lastAdded || !getCartCount(lastAdded)) return; changeCart(lastAdded,-1); }
+    function cartItems(){ return products.filter(p => getCartCount(p.id) > 0).map(p => ({...p, qty:getCartCount(p.id), lineTotal:getCartCount(p.id) * p.price})); }
+    function cartTotals(){ const items = cartItems(); return { units: items.reduce((s,i)=>s+i.qty,0), unique: items.length, total: items.reduce((s,i)=>s+i.lineTotal,0) }; }
+    function filteredProducts(){ return products.filter(p => { const catOk = activeCategory === "Alle" || p.category === activeCategory; const q = searchText.trim().toLowerCase(); const hay = (p.name + " " + p.category).toLowerCase(); return catOk && (!q || hay.includes(q)); }); }
+
+    function expiryTime(iso){
+      return new Date(new Date(iso).getTime() + EXPIRY_MINUTES * 60000);
+    }
+    function isExpired(order){
+      return order.status === "pending_payment" && Date.now() > expiryTime(order.createdAt).getTime();
+    }
+    function expireOldOrders(){
+      let changed = false;
+      orders.forEach(order => {
+        if (isExpired(order)) {
+          order.status = "expired";
+          changed = true;
+        }
+      });
+      if (changed) saveOrders();
+    }
+    function minutesLeft(order){
+      const ms = expiryTime(order.createdAt).getTime() - Date.now();
+      return Math.max(0, Math.ceil(ms / 60000));
+    }
+
+    function placeOrder(){
+      const items = cartItems();
+      if (!items.length){ alert("Velg minst én vare først."); return; }
+      const totals = cartTotals();
+      const orderNo = nextOrderNo();
+      const order = {
+        id:"order-" + orderNo,
+        orderNo,
+        createdAt:new Date().toISOString(),
+        status:"pending_payment",
+        vippsNumber:"966356",
+        paymentMessage:String(orderNo),
+        items,
+        units:totals.units,
+        total:totals.total
+      };
+      orders.unshift(order);
+      saveOrders();
+      lastCreatedOrder = order;
+      clearCart();
+      showReceipt();
+      renderBar();
+    }
+
+    function showReceipt(){
+      if (!lastCreatedOrder) return;
+      document.getElementById("customer-step-order").classList.add("hidden");
+      document.getElementById("customer-step-receipt").classList.remove("hidden");
+      document.getElementById("receiptOrderNo").textContent = "#" + lastCreatedOrder.orderNo;
+      document.getElementById("receiptMessageNo").textContent = lastCreatedOrder.orderNo;
+      document.getElementById("receiptTotal").textContent = formatKr(lastCreatedOrder.total);
+      document.getElementById("receiptExpires").textContent = "Ordren utløper hvis den ikke er betalt innen " + expiryTime(lastCreatedOrder.createdAt).toLocaleTimeString("nb-NO", {hour:"2-digit",minute:"2-digit"});
+      document.getElementById("receiptItems").innerHTML = lastCreatedOrder.items.map(item => `<div class="receipt-item"><span>${item.icon} ${item.name} x ${item.qty}</span><strong>${formatKr(item.lineTotal)}</strong></div>`).join("");
+      renderQr(lastCreatedOrder.orderNo);
+      document.getElementById("stickyCount").textContent = "Ordre #" + lastCreatedOrder.orderNo;
+      document.getElementById("stickyTotal").textContent = "Betal: " + formatKr(lastCreatedOrder.total);
+    }
+
+    function showOrderPage(){
+      document.getElementById("customer-step-order").classList.remove("hidden");
+      document.getElementById("customer-step-receipt").classList.add("hidden");
+      renderCustomer();
+    }
+
+    function renderCustomer(){
+      const grid = document.getElementById("productGrid");
+      grid.innerHTML = filteredProducts().map(p => `<button class="card" type="button" onclick="addToCart('${p.id}')"><div class="badge">${getCartCount(p.id)}</div><div class="icon">${p.icon}</div><div class="name">${p.name}</div><div class="meta">${p.category}</div><div class="rowline"><span class="price">${formatKr(p.price)}</span><span class="tap">Trykk +1</span></div></button>`).join("");
+      const items = cartItems();
+      document.getElementById("cartList").innerHTML = items.length ? items.map(item => `<div class="order-row"><div class="order-icon">${item.icon}</div><div><div class="order-name">${item.name}</div><div class="order-meta">${formatKr(item.price)} per stk</div><div class="qty"><button type="button" onclick="changeCart('${item.id}',-1)">−</button><strong>${item.qty}</strong><button type="button" onclick="changeCart('${item.id}',1)">+</button></div></div><div class="line-total">${formatKr(item.lineTotal)}</div></div>`).join("") : `<div class="empty">Ingen varer valgt ennå.</div>`;
+      const totals = cartTotals();
+      document.getElementById("cartUnits").textContent = totals.units;
+      document.getElementById("cartUnique").textContent = totals.unique;
+      document.getElementById("cartTotal").textContent = formatKr(totals.total);
+      document.getElementById("stickyCount").textContent = totals.units + " varer";
+      document.getElementById("stickyTotal").textContent = "Totalt: " + formatKr(totals.total);
+    }
+
+    function setStatus(orderId,status){
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+      order.status = status;
+      saveOrders();
+      renderBar();
+    }
+
+    function clearExpired(){
+      orders = orders.filter(o => o.status !== "expired");
+      saveOrders();
+      renderBar();
+    }
+
+    function resetAllOrders(){
+      if (!confirm("Nullstille alle ordre i demoen?")) return;
+      orders = [];
+      saveOrders();
+      renderBar();
+    }
+
+    function timeText(iso){ const d = new Date(iso); return d.toLocaleTimeString("nb-NO",{hour:"2-digit",minute:"2-digit"}); }
+
+    function renderTicket(order,status){
+      const badgeClass = status === "pending_payment" ? "pending" : status === "paid" ? "paid" : status === "ready" ? "ready" : "expired";
+      const badgeText = status === "pending_payment" ? "Venter betaling" : status === "paid" ? "Betalt" : status === "ready" ? "Klar / utlevert" : "Utløpt";
+      let actions = "";
+      if (status === "pending_payment"){
+        actions = `<div class="status-actions"><button class="ok" type="button" onclick="setStatus('${order.id}','paid')">Marker som betalt</button><button class="gray" type="button" onclick="setStatus('${order.id}','expired')">Avbryt ordre</button></div>`;
+      } else if (status === "paid"){
+        actions = `<div class="status-actions"><button class="blue" type="button" onclick="setStatus('${order.id}','ready')">Marker som klar</button><button class="gray" type="button" onclick="setStatus('${order.id}','pending_payment')">Tilbake til venter betaling</button></div>`;
+      } else if (status === "ready"){
+        actions = `<div class="status-actions"><button class="gray" type="button" onclick="setStatus('${order.id}','paid')">Tilbake til betalt</button></div>`;
+      }
+      const extra = status === "pending_payment"
+        ? `<div class="tiny">Vipps: #${order.vippsNumber} • melding: ${order.paymentMessage} • utløper om ca ${minutesLeft(order)} min</div>`
+        : status === "expired"
+          ? `<div class="tiny">Ordren ble ikke bekreftet betalt i tide.</div>`
+          : "";
+      return `<div class="ticket"><div class="ticket-top"><div><div class="ticket-no">Ordre #${order.orderNo}</div><div class="tiny">${timeText(order.createdAt)}</div></div><div class="ticket-total">${formatKr(order.total)}</div></div><div><span class="status-badge ${badgeClass}">${badgeText}</span></div><div class="ticket-items">${order.items.map(item => `<div>${item.icon} ${item.name} x ${item.qty}</div>`).join("")}</div>${extra}${actions}</div>`;
+    }
+
+    function renderBar(){
+      expireOldOrders();
+      const pending = orders.filter(o => o.status === "pending_payment");
+      const paid = orders.filter(o => o.status === "paid");
+      const ready = orders.filter(o => o.status === "ready");
+      const expired = orders.filter(o => o.status === "expired");
+      document.getElementById("pendingList").innerHTML = pending.length ? pending.map(o => renderTicket(o,"pending_payment")).join("") : `<div class="empty">Ingen ordre venter på betaling.</div>`;
+      document.getElementById("paidList").innerHTML = paid.length ? paid.map(o => renderTicket(o,"paid")).join("") : `<div class="empty">Ingen betalte ordre akkurat nå.</div>`;
+      document.getElementById("readyList").innerHTML = ready.length ? ready.map(o => renderTicket(o,"ready")).join("") : `<div class="empty">Ingen klare ordre akkurat nå.</div>`;
+      document.getElementById("expiredList").innerHTML = expired.length ? expired.map(o => renderTicket(o,"expired")).join("") : `<div class="empty">Ingen utløpte ordre.</div>`;
+      document.getElementById("countPending").textContent = pending.length;
+      document.getElementById("countPaid").textContent = paid.length;
+      document.getElementById("countReady").textContent = ready.length;
+      document.getElementById("countExpired").textContent = expired.length;
+    }
+
+    function demoOrder(){
+      clearCart();
+      addToCart("dahls");
+      addToCart("dahls");
+      addToCart("polse");
+      addToCart("brus");
+    }
+
+    function setRoute(){
+      const route = location.hash || "#/bestill";
+      document.querySelectorAll(".route").forEach(el => el.classList.add("hidden"));
+      document.getElementById("nav-bestill").classList.toggle("active", route === "#/bestill");
+      document.getElementById("nav-bar").classList.toggle("active", route === "#/bar");
+      if (route === "#/bar"){
+        document.getElementById("view-bar").classList.remove("hidden");
+        renderBar();
+        document.getElementById("stickyCount").textContent = "Barskjerm";
+        document.getElementById("stickyTotal").textContent = "Sveian";
+      } else {
+        document.getElementById("view-bestill").classList.remove("hidden");
+        const showingReceipt = !document.getElementById("customer-step-receipt").classList.contains("hidden");
+        if (showingReceipt && lastCreatedOrder) showReceipt();
+        else showOrderPage();
+      }
+    }
+
+    function renderQr(orderNo){
+      const text = "SVEIAN-ORDER-" + orderNo;
+      const bits = text.split("").map(ch => ch.charCodeAt(0).toString(2).padStart(8,"0")).join("");
+      const size = 21;
+      let cells = "";
+      for (let y = 0; y < size; y++){
+        for (let x = 0; x < size; x++){
+          const idx = (x + y * size) % bits.length;
+          const finder = ((x<7&&y<7)||(x>13&&y<7)||(x<7&&y>13));
+          const dark = finder ? ((x%6===0||y%6===0||((x>1&&x<5)&&(y>1&&y<5)))) : bits[idx] === "1";
+          cells += `<rect x="${x}" y="${y}" width="1" height="1" fill="${dark ? "#111" : "#fff"}"></rect>`;
+        }
+      }
+      document.getElementById("receiptQr").innerHTML = `<svg viewBox="0 0 ${size} ${size}" width="160" height="160" aria-label="Ordre QR">${cells}</svg>`;
+    }
+
+    document.getElementById("searchInput").addEventListener("input", e => { searchText = e.target.value; renderCustomer(); });
+    document.querySelectorAll(".chip").forEach(btn => btn.addEventListener("click", () => { document.querySelectorAll(".chip").forEach(b => b.classList.remove("active")); btn.classList.add("active"); activeCategory = btn.dataset.cat; renderCustomer(); }));
+    document.getElementById("placeOrderBtn").addEventListener("click", placeOrder);
+    document.getElementById("undoBtn").addEventListener("click", undoLast);
+    document.getElementById("clearCartBtn").addEventListener("click", clearCart);
+    document.getElementById("demoBtn").addEventListener("click", demoOrder);
+    document.getElementById("newOrderBtn").addEventListener("click", () => { lastCreatedOrder = null; showOrderPage(); });
+    document.getElementById("clearExpiredBtn").addEventListener("click", clearExpired);
+    document.getElementById("resetDemoBtn").addEventListener("click", resetAllOrders);
+    window.addEventListener("hashchange", setRoute);
+    window.addEventListener("storage", () => { orders = loadOrders(); renderBar(); });
+
+    setInterval(() => {
+      orders = loadOrders();
+      renderBar();
+      const showingReceipt = !document.getElementById("customer-step-receipt").classList.contains("hidden");
+      if (showingReceipt && lastCreatedOrder) {
+        const latest = orders.find(o => o.id === lastCreatedOrder.id);
+        if (latest) {
+          lastCreatedOrder = latest;
+          document.getElementById("receiptExpires").textContent = latest.status === "expired"
+            ? "Ordren er utløpt. Lag ny bestilling."
+            : "Ordren utløper hvis den ikke er betalt innen " + expiryTime(latest.createdAt).toLocaleTimeString("nb-NO", {hour:"2-digit",minute:"2-digit"});
+        }
+      }
+    }, 15000);
+
+    renderCustomer();
+    renderBar();
+    setRoute();
+  </script>
+</body>
+</html>
