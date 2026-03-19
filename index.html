@@ -324,9 +324,13 @@
       document.getElementById("stickyTotal").textContent = "Betal: " + formatKr(lastCreatedOrder.total);
     }
 
-    function showOrderPage(){
-      document.getElementById("customer-step-order").classList.remove("hidden");
-      document.getElementById("customer-step-receipt").classList.add("hidden");
+    function showOrderPage() {
+      const orderStep = document.getElementById("customer-step-order");
+      const receiptStep = document.getElementById("customer-step-receipt");
+
+      if (orderStep) orderStep.classList.remove("hidden");
+      if (receiptStep) receiptStep.classList.add("hidden");
+
       renderCustomer();
     }
 
@@ -409,25 +413,28 @@
       addToCart("brus");
     }
 
-    function setRoute(){
-      const route = location.hash || "#/bestill";
-      
+    function setRoute() {
       document.querySelectorAll(".route").forEach(el => el.classList.add("hidden"));
-      document.getElementById("nav-bestill").classList.add("active");
-      
-      document.getElementById("view-bestill").classList.remove("hidden");
-  
-      const showingReceipt = !document.getElementById("customer-step-receipt").classList.contains("hidden");
+
+      const bestillView = document.getElementById("view-bestill");
+      const orderStep = document.getElementById("customer-step-order");
+      const receiptStep = document.getElementById("customer-step-receipt");
+      const navBestill = document.getElementById("nav-bestill");
+
+      if (navBestill) navBestill.classList.add("active");
+      if (bestillView) bestillView.classList.remove("hidden");
+      if (orderStep) orderStep.classList.remove("hidden");
+
+      const showingReceipt = receiptStep && !receiptStep.classList.contains("hidden");
       if (showingReceipt && lastCreatedOrder) {
         showReceipt();
       } else {
-         showOrderPage();
+        showOrderPage();
       }
 
-      if (route!== "#/bestill") {
-        location.hash = "/bestill";
+      if (location.hash !== "#/bestill") {
+        history.replaceState(null, "", "#/bestill");
       }
-        
     }
 
     function renderQr(orderNo){
