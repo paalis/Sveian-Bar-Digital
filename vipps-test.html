@@ -1,1 +1,26 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vipps test</title>
+</head>
+<body style="font-family: sans-serif; text-align: center; padding: 40px; background: #111; color: white;">
+  <h1>Vipps test</h1>
+  <p id="info"></p>
+  <button onclick="pay()" style="padding:14px 20px;font-size:18px;border-radius:12px;border:0;">Simuler betaling</button>
 
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const order = params.get("order");
+    const amount = params.get("amount");
+
+    document.getElementById("info").innerText = `Ordre #${order} – ${amount} kr`;
+
+    function pay() {
+      alert("Testbetaling gjennomført");
+      window.location.href = "/#/bestill";
+    }
+  </script>
+</body>
+</html>
