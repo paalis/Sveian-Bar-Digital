@@ -256,29 +256,60 @@
       return Math.max(0, Math.ceil(ms / 60000));
     }
 
-    function placeOrder(){
+    async function placeOrder(){
       const items = cartItems();
-      if (!items.length){ alert("Velg minst én vare først."); return; }
+      if (!items.length){
+        alert("Velg minst én vare først.");
+        return;
+      }
+
       const totals = cartTotals();
-      const orderNo = nextOrderNo();
-      const order = {
-        id:"order-" + orderNo,
-        orderNo,
-        createdAt:new Date().toISOString(),
-        status:"pending_payment",
-        vippsNumber:"966356",
-        paymentMessage:String(orderNo),
-        items,
-        units:totals.units,
-        total:totals.total
-      };
-      orders.unshift(order);
-      saveOrders();
-      lastCreatedOrder = order;
-      clearCart();
-      showReceipt();
-      renderBar();
+
+      try {
+        const res = await fetch("/api/create-payment", {
+         method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            total: totals.total,
+            items: items
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          alert(data.error || "Feil ved opprettelse av betaling.");
+          return;
+        }
+
+        window.location.href = data.url;
+      } catch (err) {
+        alert("Klarte ikke å kontakte backend.");
+      }
     }
+    //function placeOrder(){
+    //  const items = cartItems();
+     // if (!items.length){ alert("Velg minst én vare først."); return; }
+    //  const totals = cartTotals();
+   //   const orderNo = nextOrderNo();
+   //   const order = {
+  //      id:"order-" + orderNo,
+     //   orderNo,
+     //   createdAt:new Date().toISOString(),
+   //     status:"pending_payment",
+    //    vippsNumber:"966356",
+    //    paymentMessage:String(orderNo),
+   //     items,
+   //     units:totals.units,
+    //    total:totals.total
+  //    };
+    //  orders.unshift(order);
+   //   saveOrders();
+   //   lastCreatedOrder = order;
+   //   clearCart();
+  //    showReceipt();
+   //   renderBar();
+ //   }
 
     function showReceipt(){
       if (!lastCreatedOrder) return;
