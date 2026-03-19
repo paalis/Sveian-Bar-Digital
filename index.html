@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Sveian bestilling + bar v2</title>
+  <title>Sveian Digital Bar v1</title>
   <style>
     :root{
       --bg:#12131a;--text:#f7f2ea;--muted:#c9c4d8;--line:rgba(255,255,255,.08);
@@ -79,11 +79,10 @@
     <div class="topbar">
       <div class="brand">
         <h1>Sveian festival</h1>
-        <p>Versjon 2 med utløp på ubetalte ordre, tydeligere digital kvittering, QR-kode for ordrenummer og barskjerm tilpasset høyere trafikk.</p>
+        <p>Her kan du bestille dine forfriskninger på en enkel måte. Dette er beta nr 1 bestillingsskjerm.</p>
       </div>
       <nav class="nav">
-        <a href="#/bestill" id="nav-bestill">Kundeside</a>
-        <a href="#/bar" id="nav-bar">Barskjerm</a>
+        <a href="#/bestill" id="nav-bestill" class="active">Kundeside</a>
       </nav>
     </div>
 
@@ -148,7 +147,7 @@
       </div>
     </section>
 
-    <section id="view-bar" class="route hidden">
+    <section id="view-bar" class="route hidden" style="display:none !important;">
       <div class="panel">
         <div class="bar-top">
           <div>
@@ -412,20 +411,23 @@
 
     function setRoute(){
       const route = location.hash || "#/bestill";
+      
       document.querySelectorAll(".route").forEach(el => el.classList.add("hidden"));
-      document.getElementById("nav-bestill").classList.toggle("active", route === "#/bestill");
-      document.getElementById("nav-bar").classList.toggle("active", route === "#/bar");
-      if (route === "#/bar"){
-        document.getElementById("view-bar").classList.remove("hidden");
-        renderBar();
-        document.getElementById("stickyCount").textContent = "Barskjerm";
-        document.getElementById("stickyTotal").textContent = "Sveian";
+      document.getElementById("nav-bestill").classList.add("active");
+      
+      document.getElementById("view-bestill").classList.remove("hidden");
+  
+      const showingReceipt = !document.getElementById("customer-step-receipt").classList.contains("hidden");
+      if (showingReceipt && lastCreatedOrder) {
+        showReceipt();
       } else {
-        document.getElementById("view-bestill").classList.remove("hidden");
-        const showingReceipt = !document.getElementById("customer-step-receipt").classList.contains("hidden");
-        if (showingReceipt && lastCreatedOrder) showReceipt();
-        else showOrderPage();
+         showOrderPage();
       }
+
+      if (route!== "#/bestill") {
+        location.hash = "/bestill";
+      }
+        
     }
 
     function renderQr(orderNo){
@@ -457,17 +459,10 @@
     window.addEventListener("storage", () => { orders = loadOrders(); renderBar(); });
 
     setInterval(() => {
-      orders = loadOrders();
-      renderBar();
-      const showingReceipt = !document.getElementById("customer-step-receipt").classList.contains("hidden");
+      const showingReceipt = !document.getElementById("customer-step-receipt").classList.contains("hidden);
       if (showingReceipt && lastCreatedOrder) {
-        const latest = orders.find(o => o.id === lastCreatedOrder.id);
-        if (latest) {
-          lastCreatedOrder = latest;
-          document.getElementById("receiptExpires").textContent = latest.status === "expired"
-            ? "Ordren er utløpt. Lag ny bestilling."
-            : "Ordren utløper hvis den ikke er betalt innen " + expiryTime(latest.createdAt).toLocaleTimeString("nb-NO", {hour:"2-digit",minute:"2-digit"});
-        }
+        document.getElementById("receiptExpires").textContent =
+          "Ordren er registert. Betaling oppdateres i baren.";
       }
     }, 15000);
 
