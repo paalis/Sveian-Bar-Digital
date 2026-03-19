@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <title>Barskjerm</title>
+</head>
+<body style="font-family:sans-serif;background:#111;color:white;padding:20px;">
+  <h1>Barskjerm</h1>
+
+  <div style="display:flex; gap:40px;">
+    
+    <div>
+      <h2>🟡 Venter betaling</h2>
+      <div id="pending"></div>
+    </div>
+
+    <div>
+      <h2>🟢 Betalt</h2>
+      <div id="paid"></div>
+    </div>
+
+  </div>
+
+  <script>
+    async function loadOrders() {
+      const res = await fetch("/api/get-orders");
+      const orders = await res.json();
+
+      const pendingDiv = document.getElementById("pending");
+      const paidDiv = document.getElementById("paid");
+
+      pendingDiv.innerHTML = "";
+      paidDiv.innerHTML = "";
+
+      orders.forEach(order => {
+        const el = document.createElement("div");
+        el.style.marginBottom = "10px";
+
+        el.innerHTML = `
+          <div style="padding:10px;border-radius:10px;background:#222;">
+            <strong>#${order.order_number}</strong><br/>
+            ${order.total} kr
+          </div>
+        `;
+
+        if (order.status === "pending_payment") {
+          pendingDiv.appendChild(el);
+        } else if (order.status === "paid") {
+          paidDiv.appendChild(el);
+        }
+      });
+    }
+
+    loadOrders();
+
+    // oppdater hvert 5 sekund
+    setInterval(loadOrders, 5000);
+  </script>
+</body>
+</html>
