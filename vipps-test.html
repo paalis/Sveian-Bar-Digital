@@ -5,10 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vipps test</title>
 </head>
-<body style="font-family: sans-serif; text-align: center; padding: 40px; background: #111; color: white;">
+<body style="font-family:sans-serif; text-align:center; padding:40px; background:#111; color:white;">
   <h1>Vipps test</h1>
   <p id="info"></p>
-  <button onclick="pay()" style="padding:14px 20px;font-size:18px;border-radius:12px;border:0;">Simuler betaling</button>
+  <button onclick="pay()" style="padding:14px 20px;font-size:18px;border-radius:12px;border:0;">
+    Simuler betaling
+  </button>
 
   <script>
     const params = new URLSearchParams(window.location.search);
@@ -17,9 +19,31 @@
 
     document.getElementById("info").innerText = `Ordre #${order} – ${amount} kr`;
 
-    function pay() {
-      alert("Testbetaling gjennomført");
-      window.location.href = "/#/bestill";
+    async function pay() {
+      try {
+        const res = await fetch("/api/update-order-status", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            orderNumber: Number(order),
+            status: "paid"
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          alert(data.error || "Kunne ikke oppdatere status");
+          return;
+        }
+
+        alert("Testbetaling gjennomført");
+        window.location.href = "/#/bestill";
+      } catch (err) {
+        alert("Feil ved oppdatering av ordrestatus");
+      }
     }
   </script>
 </body>
