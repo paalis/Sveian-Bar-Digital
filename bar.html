@@ -2,58 +2,78 @@
 <html lang="no">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Barskjerm</title>
 </head>
 <body style="font-family:sans-serif;background:#111;color:white;padding:20px;">
   <h1>Barskjerm</h1>
+  <p id="debug" style="color:#aaa;"></p>
 
-  <div style="display:flex; gap:40px;">
-    
-    <div>
+  <div style="display:flex; gap:30px; flex-wrap:wrap; align-items:flex-start;">
+    <div style="min-width:260px;">
       <h2>🟡 Venter betaling</h2>
       <div id="pending"></div>
     </div>
 
-    <div>
+    <div style="min-width:260px;">
       <h2>🟢 Betalt</h2>
       <div id="paid"></div>
     </div>
-
   </div>
 
   <script>
     async function loadOrders() {
-      const res = await fetch("/api/get-orders");
-      const orders = await res.json();
+      try {
+        const res = await fetch("/api/get-orders");
+        const orders = await res.json();
 
-      const pendingDiv = document.getElementById("pending");
-      const paidDiv = document.getElementById("paid");
+        const debug = document.getElementById("debug");
+        const pendingDiv = document.getElementById("pending");
+        const paidDiv = document.getElementById("paid");
 
-      pendingDiv.innerHTML = "";
-      paidDiv.innerHTML = "";
+        pendingDiv.innerHTML = "";
+        paidDiv.innerHTML = "";
 
-      orders.forEach(order => {
-        const el = document.createElement("div");
-        el.style.marginBottom = "10px";
-
-        el.innerHTML = `
-          <div style="padding:10px;border-radius:10px;background:#222;">
-            <strong>#${order.order_number}</strong><br/>
-            ${order.total} kr
-          </div>
-        `;
-
-        if (order.status === "pending_payment") {
-          pendingDiv.appendChild(el);
-        } else if (order.status === "paid") {
-          paidDiv.appendChild(el);
+        if (!Array.isArray(orders)) {
+          debug.innerText = "API returnerte ikke en liste";
+          return;
         }
-      });
+
+        debug.innerText = `Hentet ${orders.length} ordre`;
+
+        orders.forEach(order => {
+          const card = document.createElement("div");
+          card.style.marginBottom = "12px";
+          card.style.padding = "12px";
+          card.style.borderRadius = "12px";
+          card.style.background = "#222";
+          card.style.minWidth = "220px";
+          card.innerHTML = `
+            <strong>Ordre #${order.order_number}</strong><br>
+            ${order.total} kr<br>
+            <small>Status: ${order.status}</small>
+          `;
+
+          if (order.status === "pending_payment") {
+            pendingDiv.appendChild(card);
+          } else if (order.status === "paid") {
+            paidDiv.appendChild(card);
+          }
+        });
+
+        if (!pendingDiv.innerHTML) {
+          pendingDiv.innerHTML = "<p>Ingen ordre</p>";
+        }
+
+        if (!paidDiv.innerHTML) {
+          paidDiv.innerHTML = "<p>Ingen ordre</p>";
+        }
+      } catch (err) {
+        document.getElementById("debug").innerText = "Feil ved henting av ordre";
+      }
     }
 
     loadOrders();
-
-    // oppdater hvert 5 sekund
     setInterval(loadOrders, 5000);
   </script>
 </body>
