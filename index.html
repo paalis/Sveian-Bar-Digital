@@ -139,7 +139,7 @@
 
           <div class="receipt-actions" style="margin-top:14px;">
             <button class="ok" id="newOrderBtn" type="button">Ny bestilling</button>
-            <a class="gray" href="#/bar" style="text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;">Se barskjerm</a>
+            <a class="gray" href="#/bar.html" style="text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;">Se barskjerm</a>
           </div>
 
           <p class="tiny" style="margin-top:12px;">QR-koden er ment som hurtigoppslag på ordrenummer. Barskjermen viser i tillegg tydelig hvilke varer som hører til ordren.</p>
@@ -466,7 +466,7 @@
     window.addEventListener("storage", () => { orders = loadOrders(); renderBar(); });
 
     setInterval(() => {
-      const showingReceipt = !document.getElementById("customer-step-receipt").classList.contains("hidden);
+      const showingReceipt = !document.getElementById("customer-step-receipt").classList.contains("hidden");
       if (showingReceipt && lastCreatedOrder) {
         document.getElementById("receiptExpires").textContent =
           "Ordren er registert. Betaling oppdateres i baren.";
