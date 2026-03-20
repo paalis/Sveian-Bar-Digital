@@ -72,11 +72,18 @@
     @media (max-width:1050px){.layout{grid-template-columns:1fr}.columns{grid-template-columns:1fr 1fr}}
     @media (max-width:700px){.columns{grid-template-columns:1fr}}
     @media (max-width:560px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.actions,.receipt-actions{grid-template-columns:1fr}.card{min-height:146px}.name{font-size:.98rem}}
-  .logo {
-    max-width: 120px;
-    border: 3px solid red;
-    display:block;
+  .brand-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
   }
+  .logo {
+    width: 64px;
+    height: auto;
+    display:block;
+    flex-shrink; 0;
+  }
+  
   </style>
 </head>
 <body>
