@@ -62,27 +62,24 @@
 
     .brand-header{
       display:flex;
-      align-items:center;
-      gap:16px;
+      flex-direction:column;
+      align-items:flex-start;
     }
 
     .logo{
-      width:64px;
+      width:120px;
       height:auto;
       display:block;
+      margin-bottom:10px;
       flex-shrink:0;
-    }
-
-    .brand h1{
-      margin:0 0 6px;
-      font-size:clamp(1.8rem,4vw,2.7rem);
-      line-height:1.05;
     }
 
     .brand p{
       margin:0;
       color:var(--muted);
       line-height:1.35;
+      font-size:clamp(1rem,2.2vw,1.25rem);
+      max-width:760px;
     }
 
     .nav{
@@ -496,8 +493,7 @@
       .actions,.receipt-actions{grid-template-columns:1fr}
       .card{min-height:146px}
       .name{font-size:.98rem}
-      .brand-header{align-items:flex-start}
-      .logo{width:52px}
+      .logo{width:90px}
     }
   </style>
 </head>
@@ -507,10 +503,7 @@
       <div class="brand">
         <div class="brand-header">
           <img src="/logo.png" alt="Logo" class="logo">
-          <div>
-            <h1>Sveian festival</h1>
-            <p>Her kan du bestille dine forfriskninger på en enkel måte. Dette er beta nr 1 bestillingsskjerm.</p>
-          </div>
+          <p>Her kan du bestille dine forfriskninger på en enkel måte. Dette er beta nr 1 bestillingsskjerm.</p>
         </div>
       </div>
       <nav class="nav">
