@@ -3,7 +3,6 @@ export default async function handler(req, res) {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
     const total = body.total || 0;
     const items = body.items || [];
-    const orderNumber = Math.floor(Math.random() * 900000) + 100000;
 
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -23,7 +22,6 @@ export default async function handler(req, res) {
         "Prefer": "return=representation"
       },
       body: JSON.stringify([{
-        order_number: orderNumber,
         status: "pending_payment",
         total: total,
         items_json: items
@@ -39,6 +37,7 @@ export default async function handler(req, res) {
       });
     }
 
+    const orderNumber = inserted[0].order_number;
     const vippsUrl = `/vipps-test.html?order=${orderNumber}&amount=${total}`;
 
     return res.status(200).json({
