@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     }
 
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
-    const { orderNumber, status } = body;
+    const { id, orderNumber, status } = body;
 
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -16,8 +16,19 @@ export default async function handler(req, res) {
       });
     }
 
+    let filter = "";
+    if (id) {
+      filter = `id=eq.${id}`;
+    } else if (orderNumber) {
+      filter = `order_number=eq.${orderNumber}`;
+    } else {
+      return res.status(400).json({
+        error: "Mangler id eller orderNumber"
+      });
+    }
+
     const updateRes = await fetch(
-      `${supabaseUrl}/rest/v1/orders?order_number=eq.${orderNumber}`,
+      `${supabaseUrl}/rest/v1/orders?${filter}`,
       {
         method: "PATCH",
         headers: {
@@ -26,9 +37,7 @@ export default async function handler(req, res) {
           "Authorization": `Bearer ${supabaseServiceRoleKey}`,
           "Prefer": "return=representation"
         },
-        body: JSON.stringify({
-          status: status
-        })
+        body: JSON.stringify({ status })
       }
     );
 
@@ -43,8 +52,7 @@ export default async function handler(req, res) {
 
     if (!updated || updated.length === 0) {
       return res.status(404).json({
-        error: "Fant ingen ordre med dette ordrenummeret",
-        orderNumber
+        error: "Fant ingen ordre å oppdatere"
       });
     }
 
