@@ -13,12 +13,11 @@
       --muted:#aaa;
       --pending:orange;
       --paid:#39d39f;
+      --delivered:#5c7dff;
       --pink:#ff4fa3;
     }
 
-    *{
-      box-sizing:border-box;
-    }
+    *{ box-sizing:border-box; }
 
     body{
       font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
@@ -28,9 +27,7 @@
       padding:20px;
     }
 
-    body.tv-mode{
-      padding:12px;
-    }
+    body.tv-mode{ padding:12px; }
 
     .header{
       text-align:center;
@@ -109,7 +106,7 @@
     .column{
       min-width:300px;
       flex:1;
-      max-width:620px;
+      max-width:520px;
     }
 
     body.tv-mode .column{
@@ -134,7 +131,7 @@
       border-radius:18px;
       margin-bottom:16px;
       font-size:18px;
-      transition:transform .2s ease, box-shadow .2s ease;
+      transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
       box-shadow:0 8px 20px rgba(0,0,0,.25);
     }
 
@@ -145,6 +142,14 @@
       font-size:24px;
     }
 
+    .card.clickable{
+      cursor:pointer;
+    }
+
+    .card.clickable:active{
+      transform:scale(.99);
+    }
+
     .pending{
       border-left:6px solid var(--pending);
     }
@@ -153,8 +158,14 @@
       border-left:6px solid var(--paid);
     }
 
+    .delivered{
+      border-left:6px solid var(--delivered);
+      opacity:.92;
+    }
+
     body.tv-mode .pending,
-    body.tv-mode .paid{
+    body.tv-mode .paid,
+    body.tv-mode .delivered{
       border-left-width:8px;
     }
 
@@ -189,6 +200,16 @@
     body.tv-mode .status{
       font-size:18px;
       margin-top:8px;
+    }
+
+    .hint{
+      margin-top:8px;
+      font-size:13px;
+      color:#d9f7ea;
+    }
+
+    body.tv-mode .hint{
+      font-size:18px;
     }
 
     .new-order{
@@ -237,13 +258,8 @@
     }
 
     @media (max-width: 900px){
-      .columns{
-        flex-direction:column;
-      }
-
-      .column{
-        max-width:none;
-      }
+      .columns{ flex-direction:column; }
+      .column{ max-width:none; }
     }
   </style>
 </head>
@@ -269,6 +285,11 @@
     <div class="column">
       <h2>🟢 Betalt</h2>
       <div id="paid"></div>
+    </div>
+
+    <div class="column">
+      <h2>🔵 Utlevert</h2>
+      <div id="delivered"></div>
     </div>
   </div>
 
@@ -319,6 +340,32 @@
       }
     }
 
+    async function markDelivered(order) {
+      try {
+        const res = await fetch("/api/update-order-status", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            id: order.id,
+            status: "delivered"
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          alert(data.error || "Kunne ikke oppdatere til utlevert");
+          return;
+        }
+
+        loadOrders();
+      } catch (err) {
+        alert("Feil ved oppdatering av ordre");
+      }
+    }
+
     async function loadOrders() {
       try {
         const res = await fetch("/api/get-orders");
@@ -327,9 +374,11 @@
         const debug = document.getElementById("debug");
         const pendingDiv = document.getElementById("pending");
         const paidDiv = document.getElementById("paid");
+        const deliveredDiv = document.getElementById("delivered");
 
         pendingDiv.innerHTML = "";
         paidDiv.innerHTML = "";
+        deliveredDiv.innerHTML = "";
 
         if (!Array.isArray(orders)) {
           debug.innerText = "API returnerte ikke en liste";
@@ -338,7 +387,7 @@
 
         debug.innerText = `Hentet ${orders.length} ordre`;
 
-        orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        orders.sort((a, b) => a.order_number - b.order_number);
 
         const currentIds = new Set();
         let hasNewOrder = false;
@@ -361,10 +410,19 @@
           const card = document.createElement("div");
           const items = getItems(order);
 
-          card.className = "card " + (order.status === "paid" ? "paid" : "pending");
+          let statusClass = "pending";
+          if (order.status === "paid") statusClass = "paid";
+          if (order.status === "delivered") statusClass = "delivered";
+
+          card.className = "card " + statusClass;
 
           if (showNewBadge) {
             card.classList.add("new-order");
+          }
+
+          if (order.status === "paid") {
+            card.classList.add("clickable");
+            card.addEventListener("click", () => markDelivered(order));
           }
 
           card.innerHTML = `
@@ -379,12 +437,15 @@
 
             <div class="total">${order.total} kr</div>
             <div class="status">${order.status}</div>
+            ${order.status === "paid" ? '<div class="hint">Trykk for å markere som utlevert</div>' : ''}
           `;
 
           if (order.status === "pending_payment") {
             pendingDiv.appendChild(card);
           } else if (order.status === "paid") {
             paidDiv.appendChild(card);
+          } else if (order.status === "delivered") {
+            deliveredDiv.appendChild(card);
           }
         });
 
@@ -394,6 +455,10 @@
 
         if (!paidDiv.innerHTML) {
           paidDiv.innerHTML = '<div class="empty">Ingen ordre</div>';
+        }
+
+        if (!deliveredDiv.innerHTML) {
+          deliveredDiv.innerHTML = '<div class="empty">Ingen ordre</div>';
         }
 
         if (hasNewOrder) {
