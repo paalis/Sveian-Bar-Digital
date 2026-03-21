@@ -38,12 +38,13 @@ export default async function handler(req, res) {
     }
 
     const orderNumber = inserted[0].order_number;
-    const vippsUrl = `/vipps-test.html?order=${orderNumber}&amount=${total}`;
 
     return res.status(200).json({
+      success: true,
       orderId: inserted[0].id,
       orderNumber,
-      url: vippsUrl
+      total,
+      items
     });
   } catch (err) {
     return res.status(500).json({
