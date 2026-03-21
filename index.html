@@ -15,18 +15,10 @@
 
       --panel:rgba(78,36,0,.58);
       --panel-strong:rgba(66,28,0,.72);
-      --panel-soft:rgba(97,46,0,.48);
 
-      --accent:#ff8a00;
-      --accent2:#ffd166;
       --yellow:#ffd166;
       --orange:#ff7a00;
-      --orange-dark:#7b3b00;
-      --lime:#d7ff00;
 
-      --green:#d7ff00;
-      --blue:#6f4aa8;
-      --red:#ff7a00;
       --shadow:0 18px 40px rgba(70,25,0,.28);
       --radius:24px;
     }
@@ -307,9 +299,7 @@
       margin-top:8px;
     }
 
-    .qty button,
-    .actions button,
-    .receipt-actions button{
+    .qty button,.actions button{
       border:0;
       cursor:pointer;
     }
@@ -362,15 +352,13 @@
       line-height:1;
     }
 
-    .actions,
-    .receipt-actions{
+    .actions{
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:10px;
     }
 
-    .actions button,
-    .receipt-actions button{
+    .actions button{
       border-radius:18px;
       padding:14px;
       font-size:1rem;
@@ -398,87 +386,8 @@
       color:#3f1d00;
     }
 
-    .gray{
-      background:rgba(255,255,255,.08);
-      color:#fff;
-    }
-
-    .receipt{
-      display:grid;
-      gap:12px;
-    }
-
-    .receipt-card{
-      padding:18px;
-      border-radius:26px;
-      background:var(--panel-strong);
-      border:1px solid rgba(255,255,255,.12);
-      backdrop-filter:blur(8px);
-      -webkit-backdrop-filter:blur(8px);
-    }
-
-    .receipt-card h2{
-      margin:0 0 8px;
-      font-size:1.4rem;
-    }
-
-    .receipt-card p{
-      margin:0;
-      color:var(--muted);
-      line-height:1.4;
-    }
-
-    .receipt-meta{
-      display:grid;
-      gap:10px;
-      margin-top:14px;
-    }
-
-    .receipt-box{
-      padding:14px;
-      border-radius:18px;
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.08);
-    }
-
-    .receipt-box strong{
-      display:block;
-      margin-bottom:4px;
-    }
-
-    .receipt-items{
-      display:grid;
-      gap:8px;
-      margin-top:10px;
-    }
-
-    .receipt-item{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-    }
-
-    .tiny{
-      color:var(--muted);
-      font-size:.92rem;
-    }
-
     .hidden{
       display:none !important;
-    }
-
-    .qr{
-      display:grid;
-      place-items:center;
-      margin-top:12px;
-    }
-
-    .qr svg{
-      background:#fff;
-      border-radius:12px;
-      padding:10px;
-      max-width:160px;
-      height:auto;
     }
 
     .sticky{
@@ -546,8 +455,7 @@
         grid-template-columns:repeat(2,minmax(0,1fr));
       }
 
-      .actions,
-      .receipt-actions{
+      .actions{
         grid-template-columns:1fr;
       }
 
@@ -570,7 +478,7 @@
       </div>
     </div>
 
-    <section id="view-bestill" class="route hidden">
+    <section id="view-bestill">
       <div id="customer-step-order" class="layout">
         <div class="panel">
           <div class="toolbar">
@@ -603,44 +511,8 @@
             <button class="orange" id="demoBtn" type="button">Demoordre</button>
           </div>
 
-          <p class="tiny" style="margin-top:12px;">Ordren får status <strong>Venter på betaling</strong>. Etter bestilling får du ordrenummer og betalingsinstruksjon.</p>
+          <p style="margin-top:12px;color:var(--muted);font-size:.92rem;">Trykk bestill for å gå til simulert betaling.</p>
         </aside>
-      </div>
-
-      <div id="customer-step-receipt" class="receipt hidden">
-        <div class="receipt-card">
-          <h2>Ordre registrert</h2>
-          <p>Ordren er registrert. Betal beløpet med Vipps og bruk ordrenummeret som melding.</p>
-
-          <div class="receipt-meta">
-            <div class="receipt-box">
-              <strong>Ordrenummer</strong>
-              <div id="receiptOrderNo" style="font-size:1.8rem;font-weight:900;">#000</div>
-            </div>
-
-            <div class="receipt-box">
-              <strong>Betal med Vipps</strong>
-              <div>Send beløpet til <strong>#966356</strong></div>
-              <div>Melding: <strong id="receiptMessageNo">000</strong></div>
-              <div id="receiptExpires" class="tiny" style="margin-top:6px;"></div>
-            </div>
-
-            <div class="receipt-box">
-              <strong>Total</strong>
-              <div id="receiptTotal" style="font-size:1.3rem;font-weight:900;">0 kr</div>
-            </div>
-          </div>
-
-          <div class="qr"><div id="receiptQr"></div></div>
-          <div class="receipt-items" id="receiptItems"></div>
-
-          <div class="receipt-actions" style="margin-top:14px;">
-            <a id="SimulatePayBtn" class="orange" href="#" style"text-decoration:none;text-align:center;display:flex;align-items;justify-content:center;">Simuler betaling</a>
-            <button class="ok" id="newOrderBtn" type="button">Ny bestilling</button>
-          </div>
-
-          <p class="tiny" style="margin-top:12px;">QR-koden er ment som hurtigoppslag på ordrenummer.</p>
-        </div>
       </div>
     </section>
   </div>
@@ -683,7 +555,6 @@
     let lastAdded = null;
     let activeCategory = "Alle";
     let searchText = "";
-    let lastCreatedOrder = null;
 
     function formatKr(v){
       return new Intl.NumberFormat("nb-NO").format(v) + " kr";
@@ -770,54 +641,10 @@
           return;
         }
 
-        lastCreatedOrder = {
-          id: data.orderId,
-          orderNo: data.orderNumber,
-          total: data.total,
-          items: data.items
-        };
-
-        clearCart();
-        showReceipt();
-
+        window.location.href = `/vipps-test.html?order=${data.orderNumber}&amount=${data.total}`;
       } catch (err) {
         alert("Klarte ikke å kontakte backend.");
       }
-    }
-
-    function showReceipt(){
-      if (!lastCreatedOrder) return;
-
-      document.getElementById("customer-step-order").classList.add("hidden");
-      document.getElementById("customer-step-receipt").classList.remove("hidden");
-
-      document.getElementById("receiptOrderNo").textContent = "#" + lastCreatedOrder.orderNo;
-      document.getElementById("receiptMessageNo").textContent = lastCreatedOrder.orderNo;
-      document.getElementById("receiptTotal").textContent = formatKr(lastCreatedOrder.total);
-
-      document.getElementById("receiptExpires").textContent =
-        "Betal til Vipps-nummeret over og bruk ordrenummer som melding.";
-
-      document.getElementById("receiptItems").innerHTML = lastCreatedOrder.items
-        .map(item => `
-          <div class="receipt-item">
-            <span>${item.icon} ${item.name} x ${item.qty}</span>
-            <strong>${formatKr(item.lineTotal)}</strong>
-          </div>
-        `).join("");
-
-      renderQr(lastCreatedOrder.orderNo);
-
-      document.getElementById("stickyCount").textContent = "Ordre #" + lastCreatedOrder.orderNo;
-      document.getElementById("stickyTotal").textContent = "Betal: " + formatKr(lastCreatedOrder.total);
-    }
-
-    function showOrderPage(){
-      const orderStep = document.getElementById("customer-step-order");
-      const receiptStep = document.getElementById("customer-step-receipt");
-      if (orderStep) orderStep.classList.remove("hidden");
-      if (receiptStep) receiptStep.classList.add("hidden");
-      renderCustomer();
     }
 
     function renderCustomer(){
@@ -868,47 +695,6 @@
       addToCart("brus");
     }
 
-    function setRoute(){
-      document.querySelectorAll(".route").forEach(el => el.classList.add("hidden"));
-
-      const bestillView = document.getElementById("view-bestill");
-      const orderStep = document.getElementById("customer-step-order");
-      const receiptStep = document.getElementById("customer-step-receipt");
-
-      if (bestillView) bestillView.classList.remove("hidden");
-      if (orderStep) orderStep.classList.remove("hidden");
-
-      const showingReceipt = receiptStep && !receiptStep.classList.contains("hidden");
-      if (showingReceipt && lastCreatedOrder) {
-        showReceipt();
-      } else {
-        showOrderPage();
-      }
-
-      if (location.hash !== "#/bestill") {
-        history.replaceState(null, "", "#/bestill");
-      }
-    }
-
-    function renderQr(orderNo){
-      const text = "SVEIAN-ORDER-" + orderNo;
-      const bits = text.split("").map(ch => ch.charCodeAt(0).toString(2).padStart(8,"0")).join("");
-      const size = 21;
-      let cells = "";
-      for (let y = 0; y < size; y++){
-        for (let x = 0; x < size; x++){
-          const idx = (x + y * size) % bits.length;
-          const finder = ((x<7&&y<7)||(x>13&&y<7)||(x<7&&y>13));
-          const dark = finder
-            ? ((x%6===0||y%6===0||((x>1&&x<5)&&(y>1&&y<5))))
-            : bits[idx] === "1";
-          cells += `<rect x="${x}" y="${y}" width="1" height="1" fill="${dark ? "#111" : "#fff"}"></rect>`;
-        }
-      }
-      document.getElementById("receiptQr").innerHTML =
-        `<svg viewBox="0 0 ${size} ${size}" width="160" height="160" aria-label="Ordre QR">${cells}</svg>`;
-    }
-
     document.getElementById("searchInput").addEventListener("input", e => {
       searchText = e.target.value;
       renderCustomer();
@@ -925,13 +711,8 @@
     document.getElementById("undoBtn").addEventListener("click", undoLast);
     document.getElementById("clearCartBtn").addEventListener("click", clearCart);
     document.getElementById("demoBtn").addEventListener("click", demoOrder);
-    document.getElementById("newOrderBtn").addEventListener("click", () => {
-      lastCreatedOrder = null;
-      showOrderPage();
-    });
 
     renderCustomer();
-    setRoute();
   </script>
 </body>
 </html>
