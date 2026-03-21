@@ -3,28 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Sveian Bestilling</title>
+  <title>Sommerfest på Sveian</title>
   <style>
     :root{
-      --bg:#111114;
-      --bg2:#2d1240;
-      --panel:#2d1240;
-      --panel-soft:#4a235f;
-      --text:#efe5d2;
-      --muted:#cfc2ad;
-      --line:rgba(255,255,255,.10);
+      --bg-top:#ff6a00;
+      --bg-bottom:#f7c600;
 
-      --accent:#ff6a00;
-      --accent2:#f7c600;
-      --lime:#d7ff00;
+      --night:#2d1240;
+      --night-soft:#4a235f;
       --cream:#efe5d2;
+      --muted:#d8ccb8;
+      --line:rgba(255,255,255,.14);
 
-      --green:#d7ff00;
-      --blue:#6f4aa8;
-      --red:#ff6a00;
-      --orange:#ff8f1f;
+      --lime:#d7ff00;
+      --yellow:#f7c600;
+      --orange:#ff6a00;
+      --orange-soft:#ff8f1f;
 
-      --shadow:0 18px 40px rgba(0,0,0,.32);
+      --shadow:0 18px 40px rgba(0,0,0,.28);
       --radius:24px;
     }
 
@@ -33,19 +29,55 @@
       -webkit-tap-highlight-color:transparent;
     }
 
+    html, body{
+      min-height:100%;
+    }
+
     body{
       margin:0;
-      color:var(--text);
+      color:var(--cream);
       font-family:Arial, sans-serif;
       background:
-        radial-gradient(circle at top center, rgba(247,198,0,.18), transparent 24%),
-        linear-gradient(180deg, #2d1240 0px, #111114 180px);
+        radial-gradient(circle at 50% -10%, rgba(255,255,255,.22), transparent 28%),
+        radial-gradient(circle at 15% 20%, rgba(255,255,255,.10), transparent 18%),
+        radial-gradient(circle at 85% 15%, rgba(255,255,255,.10), transparent 18%),
+        linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+      background-attachment:fixed;
+      position:relative;
+      overflow-x:hidden;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      top:-140px;
+      left:50%;
+      transform:translateX(-50%);
+      width:720px;
+      height:720px;
+      background:radial-gradient(circle, rgba(255,255,255,.22), transparent 60%);
+      filter:blur(85px);
+      pointer-events:none;
+      z-index:0;
+    }
+
+    body::after{
+      content:"";
+      position:fixed;
+      inset:0;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(45,18,64,.08), transparent 18%),
+        radial-gradient(circle at 80% 65%, rgba(45,18,64,.08), transparent 18%);
+      pointer-events:none;
+      z-index:0;
     }
 
     .app{
+      position:relative;
+      z-index:1;
       max-width:1220px;
       margin:0 auto;
-      padding:14px 14px 140px;
+      padding:16px 14px 140px;
     }
 
     .topbar{
@@ -54,17 +86,17 @@
       z-index:50;
       padding-top:8px;
       margin-bottom:16px;
-      backdrop-filter:blur(10px);
-      -webkit-backdrop-filter:blur(10px);
+      backdrop-filter:blur(8px);
+      -webkit-backdrop-filter:blur(8px);
     }
 
     .brand{
       position:relative;
       text-align:center;
-      background:linear-gradient(135deg, #ff6a00, #f7c600);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:28px;
-      padding:26px 20px 20px;
+      background:linear-gradient(180deg, rgba(45,18,64,.78), rgba(74,35,95,.82));
+      border:1px solid rgba(239,229,210,.22);
+      border-radius:32px;
+      padding:28px 20px 22px;
       box-shadow:var(--shadow);
       overflow:hidden;
     }
@@ -72,18 +104,16 @@
     .brand::before{
       content:"";
       position:absolute;
-      left:50%;
-      bottom:-90px;
-      width:280px;
-      height:280px;
+      inset:auto 50% -110px 50%;
+      width:360px;
+      height:360px;
       transform:translateX(-50%);
-      background:
-        radial-gradient(circle,
-        rgba(255,255,255,.10) 0%,
-        rgba(247,198,0,.18) 30%,
-        rgba(255,106,0,.14) 60%,
-        transparent 78%);
-      filter:blur(28px);
+      background:radial-gradient(circle,
+        rgba(247,198,0,.34) 0%,
+        rgba(255,106,0,.24) 35%,
+        rgba(255,255,255,.08) 55%,
+        transparent 72%);
+      filter:blur(36px);
       pointer-events:none;
     }
 
@@ -93,23 +123,37 @@
     }
 
     .top-logo{
-      width:180px;
-      max-width:78%;
+      width:210px;
+      max-width:82%;
       height:auto;
       display:block;
-      margin:0 auto 16px;
+      margin:0 auto 14px;
       filter:
-        drop-shadow(0 8px 24px rgba(0,0,0,.28))
-        drop-shadow(0 0 18px rgba(255,255,255,.10));
+        drop-shadow(0 10px 28px rgba(0,0,0,.34))
+        drop-shadow(0 0 16px rgba(255,255,255,.10));
     }
 
     .brand p{
       margin:0 auto;
-      color:#2d1240;
+      color:var(--cream);
       line-height:1.4;
-      font-size:clamp(1rem,2.2vw,1.2rem);
+      font-size:clamp(1rem,2.2vw,1.22rem);
       max-width:760px;
-      font-weight:700;
+    }
+
+    .festival-stars{
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      margin-top:14px;
+      opacity:.92;
+      flex-wrap:wrap;
+    }
+
+    .festival-stars span{
+      color:var(--yellow);
+      font-size:1rem;
+      text-shadow:0 0 10px rgba(247,198,0,.25);
     }
 
     .layout{
@@ -120,9 +164,11 @@
     }
 
     .panel{
-      background:linear-gradient(180deg, rgba(74,35,95,.92), rgba(45,18,64,.92));
-      border:1px solid rgba(239,229,210,.10);
-      border-radius:var(--radius);
+      background:rgba(45,18,64,0.84);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:28px;
       box-shadow:var(--shadow);
       padding:16px;
     }
@@ -131,6 +177,7 @@
       margin:0 0 12px;
       font-size:1.2rem;
       color:var(--cream);
+      letter-spacing:.2px;
     }
 
     .toolbar{
@@ -142,18 +189,19 @@
     }
 
     .chip{
-      border:1px solid rgba(239,229,210,.14);
-      background:rgba(255,255,255,.04);
-      color:var(--text);
+      border:1px solid rgba(239,229,210,.18);
+      background:rgba(255,255,255,.05);
+      color:var(--cream);
       border-radius:999px;
-      padding:10px 14px;
+      padding:11px 15px;
       font-weight:800;
       cursor:pointer;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);
     }
 
     .chip.active{
-      background:linear-gradient(135deg, #f7c600, #ff6a00);
-      color:#111114;
+      background:linear-gradient(135deg, var(--yellow), var(--orange));
+      color:#201020;
       border-color:transparent;
     }
 
@@ -163,18 +211,18 @@
       display:flex;
       align-items:center;
       gap:10px;
-      padding:12px 14px;
-      border-radius:16px;
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(239,229,210,.10);
-      color:var(--text);
+      padding:13px 14px;
+      border-radius:18px;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(239,229,210,.14);
+      color:var(--cream);
     }
 
     .search input{
       width:100%;
       border:0;
       background:transparent;
-      color:var(--text);
+      color:var(--cream);
       outline:none;
       font-size:1rem;
     }
@@ -191,27 +239,38 @@
 
     .card{
       position:relative;
-      border:1px solid rgba(239,229,210,.10);
-      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
-      border-radius:24px;
+      border:1px solid rgba(239,229,210,.14);
+      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      border-radius:26px;
       padding:16px 14px;
       min-height:152px;
       text-align:left;
       color:inherit;
       cursor:pointer;
       box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:auto -20px -20px auto;
+      width:90px;
+      height:90px;
+      background:radial-gradient(circle, rgba(247,198,0,.12), transparent 70%);
+      pointer-events:none;
     }
 
     .card:active{
-      transform:scale(.98);
+      transform:scale(.985);
     }
 
     .badge{
       position:absolute;
       top:12px;
       right:12px;
-      min-width:38px;
-      height:38px;
+      min-width:40px;
+      height:40px;
       border-radius:999px;
       display:flex;
       align-items:center;
@@ -220,6 +279,7 @@
       font-weight:900;
       background:var(--lime);
       color:#111114;
+      box-shadow:0 8px 18px rgba(0,0,0,.18);
     }
 
     .icon{
@@ -250,8 +310,8 @@
     }
 
     .price{
-      color:var(--accent2);
-      font-size:1.14rem;
+      color:var(--yellow);
+      font-size:1.18rem;
       font-weight:900;
     }
 
@@ -270,7 +330,7 @@
 
     .empty{
       padding:16px;
-      border:1px dashed rgba(239,229,210,.16);
+      border:1px dashed rgba(239,229,210,.18);
       border-radius:18px;
       color:var(--muted);
       background:rgba(255,255,255,.03);
@@ -282,8 +342,8 @@
       gap:10px;
       align-items:center;
       padding:12px;
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(239,229,210,.08);
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(239,229,210,.10);
       border-radius:18px;
     }
 
@@ -337,9 +397,9 @@
       display:grid;
       gap:10px;
       padding:16px;
-      border-radius:20px;
-      background:linear-gradient(135deg, rgba(255,106,0,.18), rgba(247,198,0,.18));
-      border:1px solid rgba(239,229,210,.10);
+      border-radius:22px;
+      background:linear-gradient(135deg, rgba(255,106,0,.22), rgba(247,198,0,.22));
+      border:1px solid rgba(239,229,210,.12);
       margin-bottom:14px;
     }
 
@@ -356,13 +416,13 @@
       align-items:end;
       gap:12px;
       padding-top:10px;
-      border-top:1px solid rgba(239,229,210,.12);
+      border-top:1px solid rgba(239,229,210,.14);
       font-weight:900;
     }
 
     .sumtotal strong{
       font-size:2rem;
-      color:var(--accent2);
+      color:var(--yellow);
       line-height:1;
     }
 
@@ -375,30 +435,31 @@
 
     .actions button,
     .receipt-actions button{
-      border-radius:16px;
+      border-radius:18px;
       padding:14px;
       font-size:1rem;
       font-weight:900;
+      box-shadow:var(--shadow);
     }
 
     .ok{
-      background:linear-gradient(135deg, #d7ff00, #f7c600);
+      background:linear-gradient(135deg, var(--lime), var(--yellow));
       color:#111114;
     }
 
     .blue{
       background:linear-gradient(135deg, #6f4aa8, #2d1240);
       color:#fff;
-      border:1px solid rgba(239,229,210,.10);
+      border:1px solid rgba(239,229,210,.12);
     }
 
     .pink{
-      background:linear-gradient(135deg, #ff6a00, #f7c600);
+      background:linear-gradient(135deg, var(--orange), var(--yellow));
       color:#111114;
     }
 
     .orange{
-      background:linear-gradient(135deg, #ff6a00, #ff8f1f);
+      background:linear-gradient(135deg, var(--orange), var(--orange-soft));
       color:#111114;
     }
 
@@ -414,14 +475,16 @@
 
     .receipt-card{
       padding:18px;
-      border-radius:22px;
-      background:linear-gradient(180deg, rgba(74,35,95,.92), rgba(45,18,64,.92));
-      border:1px solid rgba(239,229,210,.10);
+      border-radius:26px;
+      background:rgba(45,18,64,.88);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
+      border:1px solid rgba(239,229,210,.14);
     }
 
     .receipt-card h2{
       margin:0 0 8px;
-      font-size:1.4rem;
+      font-size:1.45rem;
       color:var(--cream);
     }
 
@@ -441,7 +504,7 @@
       padding:14px;
       border-radius:18px;
       background:rgba(255,255,255,.04);
-      border:1px solid rgba(239,229,210,.08);
+      border:1px solid rgba(239,229,210,.10);
     }
 
     .receipt-box strong{
@@ -491,7 +554,8 @@
       right:0;
       bottom:0;
       padding:12px 14px calc(12px + env(safe-area-inset-bottom));
-      background:linear-gradient(180deg, rgba(17,17,20,0), rgba(17,17,20,.85) 20%, rgba(17,17,20,1));
+      background:linear-gradient(180deg, rgba(17,17,20,0), rgba(17,17,20,.3) 12%, rgba(17,17,20,.7) 36%, rgba(17,17,20,1));
+      z-index:60;
     }
 
     .sticky-inner{
@@ -502,8 +566,8 @@
       align-items:center;
       gap:12px;
       background:rgba(45,18,64,.95);
-      border:1px solid rgba(239,229,210,.10);
-      border-radius:22px;
+      border:1px solid rgba(239,229,210,.12);
+      border-radius:24px;
       padding:14px 16px;
       box-shadow:var(--shadow);
     }
@@ -517,13 +581,15 @@
     }
 
     .sticky-total{
-      color:var(--accent2);
+      color:var(--yellow);
       font-weight:900;
       font-size:1.15rem;
     }
 
     @media (max-width:1050px){
-      .layout{grid-template-columns:1fr}
+      .layout{
+        grid-template-columns:1fr;
+      }
     }
 
     @media (max-width:560px){
@@ -533,7 +599,7 @@
 
       .brand{
         padding:24px 18px 20px;
-        border-radius:24px;
+        border-radius:26px;
       }
 
       .brand p{
@@ -544,7 +610,8 @@
         grid-template-columns:repeat(2,minmax(0,1fr));
       }
 
-      .actions,.receipt-actions{
+      .actions,
+      .receipt-actions{
         grid-template-columns:1fr;
       }
 
@@ -564,6 +631,9 @@
       <div class="brand">
         <img src="/logo.png" alt="Sommerfest på Sveian" class="top-logo">
         <p>Her kan du bestille dine forfriskninger på en enkel måte. Dette er beta nr 1 bestillingsskjerm.</p>
+        <div class="festival-stars" aria-hidden="true">
+          <span>✦</span><span>✦</span><span>✦</span><span>✦</span><span>✦</span>
+        </div>
       </div>
     </div>
 
