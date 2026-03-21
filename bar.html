@@ -3,25 +3,322 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Barskjerm</title>
-</head>
-<body style="font-family:sans-serif;background:#111;color:white;padding:20px;">
-  <h1>Barskjerm</h1>
-  <p id="debug" style="color:#aaa;"></p>
+  <title>Sveian barskjerm</title>
 
-  <div style="display:flex; gap:30px; flex-wrap:wrap; align-items:flex-start;">
-    <div style="min-width:260px;">
+  <style>
+    :root{
+      --bg:#111;
+      --panel:#222;
+      --text:#fff;
+      --muted:#aaa;
+      --pending:orange;
+      --paid:#39d39f;
+      --pink:#ff4fa3;
+    }
+
+    *{
+      box-sizing:border-box;
+    }
+
+    body{
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      margin:0;
+      padding:20px;
+    }
+
+    body.tv-mode{
+      padding:12px;
+    }
+
+    .header{
+      text-align:center;
+      margin-bottom:24px;
+    }
+
+    .logo{
+      max-width:140px;
+      margin:0 auto 10px;
+      display:block;
+    }
+
+    body.tv-mode .logo{
+      max-width:180px;
+      margin-bottom:14px;
+    }
+
+    h1{
+      margin:0 0 8px;
+      font-size:32px;
+    }
+
+    body.tv-mode h1{
+      font-size:40px;
+    }
+
+    #debug{
+      color:#888;
+      margin:0;
+      font-size:14px;
+    }
+
+    body.tv-mode #debug{
+      font-size:18px;
+    }
+
+    .top-actions{
+      display:flex;
+      justify-content:center;
+      gap:10px;
+      margin:16px 0 28px;
+      flex-wrap:wrap;
+    }
+
+    .top-actions button{
+      border:0;
+      border-radius:12px;
+      padding:12px 16px;
+      cursor:pointer;
+      font-weight:700;
+      font-size:15px;
+    }
+
+    .fullscreen-btn{
+      background:#333;
+      color:white;
+    }
+
+    .tv-btn{
+      background:#444;
+      color:white;
+    }
+
+    .columns{
+      display:flex;
+      gap:30px;
+      flex-wrap:wrap;
+      align-items:flex-start;
+      justify-content:center;
+    }
+
+    body.tv-mode .columns{
+      gap:20px;
+    }
+
+    .column{
+      min-width:300px;
+      flex:1;
+      max-width:620px;
+    }
+
+    body.tv-mode .column{
+      min-width:420px;
+      max-width:unset;
+    }
+
+    h2{
+      margin:0 0 12px;
+      font-size:24px;
+    }
+
+    body.tv-mode h2{
+      font-size:32px;
+      margin-bottom:16px;
+    }
+
+    .card{
+      position:relative;
+      background:var(--panel);
+      padding:18px;
+      border-radius:18px;
+      margin-bottom:16px;
+      font-size:18px;
+      transition:transform .2s ease, box-shadow .2s ease;
+      box-shadow:0 8px 20px rgba(0,0,0,.25);
+    }
+
+    body.tv-mode .card{
+      padding:24px;
+      border-radius:20px;
+      margin-bottom:18px;
+      font-size:24px;
+    }
+
+    .pending{
+      border-left:6px solid var(--pending);
+    }
+
+    .paid{
+      border-left:6px solid var(--paid);
+    }
+
+    body.tv-mode .pending,
+    body.tv-mode .paid{
+      border-left-width:8px;
+    }
+
+    .items{
+      margin:12px 0;
+      font-size:16px;
+      color:#ddd;
+      line-height:1.45;
+    }
+
+    body.tv-mode .items{
+      font-size:22px;
+      line-height:1.55;
+    }
+
+    .total{
+      font-size:22px;
+      font-weight:800;
+      margin-top:8px;
+    }
+
+    body.tv-mode .total{
+      font-size:30px;
+    }
+
+    .status{
+      font-size:14px;
+      color:var(--muted);
+      margin-top:6px;
+    }
+
+    body.tv-mode .status{
+      font-size:18px;
+      margin-top:8px;
+    }
+
+    .new-order{
+      animation:pulse 1s ease-in-out 6;
+      box-shadow:0 0 0 3px rgba(255,209,102,.45);
+      transform:scale(1.01);
+    }
+
+    .new-badge{
+      position:absolute;
+      top:12px;
+      right:12px;
+      background:var(--pink);
+      color:white;
+      font-size:12px;
+      font-weight:800;
+      padding:6px 10px;
+      border-radius:999px;
+      letter-spacing:.4px;
+      box-shadow:0 4px 12px rgba(0,0,0,.25);
+    }
+
+    body.tv-mode .new-badge{
+      top:16px;
+      right:16px;
+      font-size:16px;
+      padding:8px 14px;
+    }
+
+    .empty{
+      color:#888;
+      background:#1a1a1a;
+      padding:14px;
+      border-radius:14px;
+    }
+
+    body.tv-mode .empty{
+      font-size:22px;
+      padding:18px;
+    }
+
+    @keyframes pulse{
+      0%   { box-shadow:0 0 0 0 rgba(255,209,102,.85); }
+      50%  { box-shadow:0 0 0 10px rgba(255,209,102,.12); }
+      100% { box-shadow:0 0 0 0 rgba(255,209,102,0); }
+    }
+
+    @media (max-width: 900px){
+      .columns{
+        flex-direction:column;
+      }
+
+      .column{
+        max-width:none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <img src="/logo.png" alt="Logo" class="logo">
+    <h1>Barskjerm</h1>
+    <p id="debug">Laster ordre...</p>
+  </div>
+
+  <div class="top-actions">
+    <button class="fullscreen-btn" id="fullscreenBtn" type="button">Fullskjerm</button>
+    <button class="tv-btn" id="tvModeBtn" type="button">TV-modus</button>
+  </div>
+
+  <div class="columns">
+    <div class="column">
       <h2>🟡 Venter betaling</h2>
       <div id="pending"></div>
     </div>
 
-    <div style="min-width:260px;">
+    <div class="column">
       <h2>🟢 Betalt</h2>
       <div id="paid"></div>
     </div>
   </div>
 
   <script>
+    let knownOrderIds = new Set();
+    let orderSeenTime = {};
+    let firstLoadDone = false;
+
+    const NEW_DURATION = 30000; // 30 sek
+
+    function playNewOrderSound() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const notes = [880, 1174, 1568];
+        let startAt = audioCtx.currentTime;
+
+        notes.forEach((freq) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(freq, startAt);
+
+          gain.gain.setValueAtTime(0.001, startAt);
+          gain.gain.exponentialRampToValueAtTime(0.12, startAt + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, startAt + 0.18);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc.start(startAt);
+          osc.stop(startAt + 0.18);
+
+          startAt += 0.12;
+        });
+      } catch (e) {
+        console.log("Lyd blokkert", e);
+      }
+    }
+
+    function getItems(order) {
+      try {
+        return typeof order.items_json === "string"
+          ? JSON.parse(order.items_json)
+          : (order.items_json || []);
+      } catch {
+        return [];
+      }
+    }
+
     async function loadOrders() {
       try {
         const res = await fetch("/api/get-orders");
@@ -41,17 +338,47 @@
 
         debug.innerText = `Hentet ${orders.length} ordre`;
 
+        orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        const currentIds = new Set();
+        let hasNewOrder = false;
+        const now = Date.now();
+
         orders.forEach(order => {
+          currentIds.add(order.id);
+
+          if (!orderSeenTime[order.id]) {
+            orderSeenTime[order.id] = now;
+          }
+
+          const isBrandNew = firstLoadDone && !knownOrderIds.has(order.id);
+          const showNewBadge = firstLoadDone && (now - orderSeenTime[order.id] < NEW_DURATION);
+
+          if (isBrandNew) {
+            hasNewOrder = true;
+          }
+
           const card = document.createElement("div");
-          card.style.marginBottom = "12px";
-          card.style.padding = "12px";
-          card.style.borderRadius = "12px";
-          card.style.background = "#222";
-          card.style.minWidth = "220px";
+          const items = getItems(order);
+
+          card.className = "card " + (order.status === "paid" ? "paid" : "pending");
+
+          if (showNewBadge) {
+            card.classList.add("new-order");
+          }
+
           card.innerHTML = `
-            <strong>Ordre #${order.order_number}</strong><br>
-            ${order.total} kr<br>
-            <small>Status: ${order.status}</small>
+            ${showNewBadge ? '<div class="new-badge">NY</div>' : ''}
+            <strong>Ordre #${order.order_number}</strong>
+
+            <div class="items">
+              ${items.length
+                ? items.map(i => `<div>• ${i.name} x ${i.qty}</div>`).join("")
+                : '<div>Ingen varelinjer</div>'}
+            </div>
+
+            <div class="total">${order.total} kr</div>
+            <div class="status">${order.status}</div>
           `;
 
           if (order.status === "pending_payment") {
@@ -62,16 +389,42 @@
         });
 
         if (!pendingDiv.innerHTML) {
-          pendingDiv.innerHTML = "<p>Ingen ordre</p>";
+          pendingDiv.innerHTML = '<div class="empty">Ingen ordre</div>';
         }
 
         if (!paidDiv.innerHTML) {
-          paidDiv.innerHTML = "<p>Ingen ordre</p>";
+          paidDiv.innerHTML = '<div class="empty">Ingen ordre</div>';
         }
+
+        if (hasNewOrder) {
+          playNewOrderSound();
+        }
+
+        knownOrderIds = currentIds;
+        firstLoadDone = true;
       } catch (err) {
         document.getElementById("debug").innerText = "Feil ved henting av ordre";
       }
     }
+
+    async function toggleFullscreen() {
+      try {
+        if (!document.fullscreenElement) {
+          await document.documentElement.requestFullscreen();
+        } else {
+          await document.exitFullscreen();
+        }
+      } catch (e) {
+        console.log("Fullskjerm støttes ikke", e);
+      }
+    }
+
+    function toggleTvMode() {
+      document.body.classList.toggle("tv-mode");
+    }
+
+    document.getElementById("fullscreenBtn").addEventListener("click", toggleFullscreen);
+    document.getElementById("tvModeBtn").addEventListener("click", toggleTvMode);
 
     loadOrders();
     setInterval(loadOrders, 5000);
