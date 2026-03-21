@@ -74,6 +74,15 @@
       flex-shrink:0;
     }
 
+
+    .top-logo {
+      width: 140px;
+      height: auto;
+      display: block;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 6px 20px rgba(0,0,0,0.4));
+    }
+    
     .brand p{
       margin:0;
       color:var(--muted);
@@ -502,13 +511,10 @@
     <div class="topbar">
       <div class="brand">
         <div class="brand-header">
-          <img src="/logo.png" alt="Logo" class="logo">
+          <img src="/logo.png" alt="Logo" class="top-logo">
           <p>Her kan du bestille dine forfriskninger på en enkel måte. Dette er beta nr 1 bestillingsskjerm.</p>
         </div>
       </div>
-      <nav class="nav">
-        <a href="#/bestill" id="nav-bestill" class="active">Kundeside</a>
-      </nav>
     </div>
 
     <section id="view-bestill" class="route hidden">
