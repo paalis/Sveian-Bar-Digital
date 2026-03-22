@@ -52,6 +52,9 @@
     }
 
     .topbar{
+      position:sticky;
+      top:10px;
+      z-index:1000;
       margin-bottom:18px;
     }
 
@@ -59,27 +62,29 @@
       background:linear-gradient(180deg, rgba(255,170,40,.22), rgba(255,120,0,.18));
       border:1px solid rgba(255,255,255,.14);
       border-radius:34px;
-      padding:22px 20px;
+      padding:26px 20px;
       box-shadow:0 18px 38px rgba(87,38,0,.24);
-      backdrop-filter:blur(2px);
-      -webkit-backdrop-filter:blur(2px);
+      backdrop-filter:blur(6px);
+      -webkit-backdrop-filter:blur(6px);
+      text-align:center;
     }
 
     .top-logo{
-      width:170px;
-      max-width:72%;
+      width:210px;
+      max-width:78%;
       height:auto;
       display:block;
-      margin:0 0 16px;
+      margin:0 auto 18px auto;
       filter:drop-shadow(0 8px 18px rgba(94,38,0,.18));
     }
 
     .brand p{
-      margin:0;
+      margin:0 auto;
       color:var(--text);
       line-height:1.28;
       font-size:clamp(1rem,2.2vw,1.2rem);
       max-width:760px;
+      text-align:center;
     }
 
     .layout{
@@ -397,6 +402,7 @@
       bottom:0;
       padding:12px 14px calc(12px + env(safe-area-inset-bottom));
       background:linear-gradient(180deg, rgba(80,30,0,0), rgba(80,30,0,.14) 16%, rgba(80,30,0,.34) 35%, rgba(80,30,0,.52));
+      z-index:1001;
     }
 
     .sticky-inner{
@@ -438,13 +444,17 @@
         padding:24px 14px 140px;
       }
 
+      .topbar{
+        top:8px;
+      }
+
       .top-logo{
-        width:170px;
+        width:190px;
       }
 
       .brand{
         border-radius:30px;
-        padding:22px 18px;
+        padding:24px 18px;
       }
 
       .brand p{
