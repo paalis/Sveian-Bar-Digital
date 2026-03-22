@@ -100,6 +100,9 @@ export default async function handler(req, res) {
     const returnUrl =
       `${appBaseUrl}/payment-complete.html?orderId=${encodeURIComponent(orderId)}&order=${encodeURIComponent(orderNumber)}`;
 
+    // Må være unik hos Vipps
+    const vippsReference = `sveian-${orderNumber}-${Date.now()}`;
+
     const paymentPayload = {
       amount: {
         value: amountInOre,
@@ -108,7 +111,7 @@ export default async function handler(req, res) {
       paymentMethod: {
         type: "WALLET"
       },
-      reference: String(orderNumber),
+      reference: vippsReference,
       userFlow: "WEB_REDIRECT",
       returnUrl,
       paymentDescription: `Sommerfest på Sveian ordre #${orderNumber}`
@@ -138,22 +141,6 @@ export default async function handler(req, res) {
         details: vippsData
       });
     }
-
-    // 4. Lagre Vipps payment reference hvis du vil ha det i databasen senere
-    // Krever at du har en kolonne, ellers kan du droppe denne blokken.
-    // try {
-    //   await fetch(`${supabaseUrl}/rest/v1/orders?id=eq.${orderId}`, {
-    //     method: "PATCH",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       "apikey": supabaseServiceRoleKey,
-    //       "Authorization": `Bearer ${supabaseServiceRoleKey}`
-    //     },
-    //     body: JSON.stringify({
-    //       vipps_reference: String(orderNumber)
-    //     })
-    //   });
-    // } catch {}
 
     return res.status(200).json({
       success: true,
