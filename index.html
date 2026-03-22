@@ -651,7 +651,7 @@
           return;
         }
 
-        window.location.href = `/vipps-test.html?order=${data.orderNumber}&amount=${data.total}`;
+        window.location.href = data.url;
       } catch (err) {
         alert("Klarte ikke å kontakte backend.");
       }
