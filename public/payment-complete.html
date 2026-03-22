@@ -48,44 +48,13 @@
   </div>
 
   <script>
-    async function run() {
       const params = new URLSearchParams(window.location.search);
-      const orderId = params.get("orderId");
       const orderNumber = params.get("order");
-
       const statusText = document.getElementById("statusText");
 
-      if (!orderId) {
-        statusText.textContent = "Fant ikke ordre å oppdatere.";
-        return;
-      }
-
-      try {
-        const res = await fetch("/api/update-order-status", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id: orderId,
-            status: "paid"
-          })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          statusText.textContent = data.error || "Kunne ikke oppdatere ordrestatus.";
-          return;
-        }
-
-        statusText.textContent = orderNumber
-          ? `Ordre #${orderNumber} er markert som betalt.`
-          : "Ordren er markert som betalt.";
-      } catch (err) {
-        statusText.textContent = "Feil ved oppdatering av ordrestatus.";
-      }
-    }
-
-    run();
+      statusText.textContent = orderNumber
+        ? `Du er tilbake fra Vipps. Ordre #${orderNumber} venter på endelig betalingsbekreftelse.`
+        : "Du er tilbake fra Vipps. Ordren venter på endelig betalingsbekreftelse.";
   </script>
 </body>
 </html>
