@@ -647,9 +647,9 @@
         const data = await res.json();
 
         if (!res.ok) {
-          alert(data.error || "Feil ved opprettelse av betaling.");
+          alert((data.error || "Feil ved opprettelse av betaling.") + (data.details ? "\n\n" + JSON.stringify(data.details) : ""));
           return;
-        }
+    }
 
         window.location.href = data.url;
       } catch (err) {
