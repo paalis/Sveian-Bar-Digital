@@ -293,17 +293,18 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    
-
     const SUPABASE_URL = "https://poszxkyqbmhiafsujtol.supabase.co";
     const SUPABASE_KEY = "sb_publishable_PcOjklS4ULHa7-MUBJriFw_2P2po6m7";
-    
+
+    let supabaseClient = null;
     let knownOrderIds = new Set();
     let orderSeenTime = {};
     let firstLoadDone = false;
+    let lastPaidIds = new Set();
 
-    const NEW_DURATION = 30000; // 30 sek
+    const NEW_DURATION = 30000;
 
     function playNewOrderSound() {
       try {
@@ -365,122 +366,164 @@
           return;
         }
 
-        loadOrders();
+        await loadOrders();
       } catch (err) {
         alert("Feil ved oppdatering av ordre");
       }
     }
 
+    function renderOrders(orders) {
+      const debug = document.getElementById("debug");
+      const pendingDiv = document.getElementById("pending");
+      const paidDiv = document.getElementById("paid");
+      const deliveredDiv = document.getElementById("delivered");
+
+      pendingDiv.innerHTML = "";
+      paidDiv.innerHTML = "";
+      deliveredDiv.innerHTML = "";
+
+      if (!Array.isArray(orders)) {
+        debug.innerText = "API returnerte ikke en liste";
+        return;
+      }
+
+      orders.sort((a, b) => a.order_number - b.order_number);
+
+      const visibleOrders = orders.filter(order =>
+        order.status === "pending_payment" ||
+        order.status === "paid" ||
+        order.status === "delivered"
+      );
+
+      debug.innerText = `Viser ${visibleOrders.length} aktive ordre`;
+
+      const currentIds = new Set();
+      let hasNewPaidOrder = false;
+      const now = Date.now();
+
+      visibleOrders.forEach(order => {
+        currentIds.add(order.id);
+
+        if (!orderSeenTime[order.id]) {
+          orderSeenTime[order.id] = now;
+        }
+
+        const showNewBadge = firstLoadDone && (now - orderSeenTime[order.id] < NEW_DURATION);
+
+        if (order.status === "paid" && !lastPaidIds.has(order.id)) {
+          hasNewPaidOrder = true;
+        }
+
+        const card = document.createElement("div");
+        const items = getItems(order);
+
+        let statusClass = "pending";
+        if (order.status === "paid") statusClass = "paid";
+        if (order.status === "delivered") statusClass = "delivered";
+
+        card.className = "card " + statusClass;
+
+        if (showNewBadge && order.status !== "delivered") {
+          card.classList.add("new-order");
+        }
+
+        if (order.status === "paid") {
+          card.classList.add("clickable");
+          card.addEventListener("click", () => markDelivered(order));
+        }
+
+        card.innerHTML = `
+          ${showNewBadge && order.status !== "delivered" ? '<div class="new-badge">NY</div>' : ''}
+          <strong>Ordre #${order.order_number}</strong>
+
+          <div class="items">
+            ${items.length
+              ? items.map(i => `<div>• ${i.name} x ${i.qty}</div>`).join("")
+              : '<div>Ingen varelinjer</div>'}
+          </div>
+
+          <div class="total">${order.total} kr</div>
+          <div class="status">${order.status}</div>
+          ${order.status === "paid" ? '<div class="hint">Trykk for å markere som utlevert</div>' : ''}
+        `;
+
+        if (order.status === "pending_payment") {
+          pendingDiv.appendChild(card);
+        } else if (order.status === "paid") {
+          paidDiv.appendChild(card);
+        } else if (order.status === "delivered") {
+          deliveredDiv.appendChild(card);
+        }
+      });
+
+      if (!pendingDiv.innerHTML) {
+        pendingDiv.innerHTML = '<div class="empty">Ingen ordre</div>';
+      }
+
+      if (!paidDiv.innerHTML) {
+        paidDiv.innerHTML = '<div class="empty">Ingen ordre</div>';
+      }
+
+      if (!deliveredDiv.innerHTML) {
+        deliveredDiv.innerHTML = '<div class="empty">Ingen ordre</div>';
+      }
+
+      if (hasNewPaidOrder) {
+        playNewOrderSound();
+      }
+
+      knownOrderIds = currentIds;
+      lastPaidIds = new Set(
+        visibleOrders.filter(o => o.status === "paid").map(o => o.id)
+      );
+      firstLoadDone = true;
+    }
+
     async function loadOrders() {
       try {
-        const res = await fetch("/api/get-orders");
+        const res = await fetch("/api/get-orders", { cache: "no-store" });
         const orders = await res.json();
-
-        const debug = document.getElementById("debug");
-        const pendingDiv = document.getElementById("pending");
-        const paidDiv = document.getElementById("paid");
-        const deliveredDiv = document.getElementById("delivered");
-
-        pendingDiv.innerHTML = "";
-        paidDiv.innerHTML = "";
-        deliveredDiv.innerHTML = "";
-
-        if (!Array.isArray(orders)) {
-          debug.innerText = "API returnerte ikke en liste";
-          return;
-        }
-
-        orders.sort((a, b) => a.order_number - b.order_number);
-
-        const visibleOrders = orders.filter(order =>
-          order.status === "pending_payment" ||
-          order.status === "paid" ||
-          order.status === "delivered"
-        );
-
-        debug.innerText = `Viser ${visibleOrders.length} aktive ordre`;
-
-        const currentIds = new Set();
-        let hasNewOrder = false;
-        const now = Date.now();
-
-        visibleOrders.forEach(order => {
-          currentIds.add(order.id);
-
-          if (!orderSeenTime[order.id]) {
-            orderSeenTime[order.id] = now;
-          }
-
-          const isBrandNew = firstLoadDone && !knownOrderIds.has(order.id);
-          const showNewBadge = firstLoadDone && (now - orderSeenTime[order.id] < NEW_DURATION);
-
-          if (isBrandNew) {
-            hasNewOrder = true;
-          }
-
-          const card = document.createElement("div");
-          const items = getItems(order);
-
-          let statusClass = "pending";
-          if (order.status === "paid") statusClass = "paid";
-          if (order.status === "delivered") statusClass = "delivered";
-
-          card.className = "card " + statusClass;
-
-          if (showNewBadge) {
-            card.classList.add("new-order");
-          }
-
-          if (order.status === "paid") {
-            card.classList.add("clickable");
-            card.addEventListener("click", () => markDelivered(order));
-          }
-
-          card.innerHTML = `
-            ${showNewBadge ? '<div class="new-badge">NY</div>' : ''}
-            <strong>Ordre #${order.order_number}</strong>
-
-            <div class="items">
-              ${items.length
-                ? items.map(i => `<div>• ${i.name} x ${i.qty}</div>`).join("")
-                : '<div>Ingen varelinjer</div>'}
-            </div>
-
-            <div class="total">${order.total} kr</div>
-            <div class="status">${order.status}</div>
-            ${order.status === "paid" ? '<div class="hint">Trykk for å markere som utlevert</div>' : ''}
-          `;
-
-          if (order.status === "pending_payment") {
-            pendingDiv.appendChild(card);
-          } else if (order.status === "paid") {
-            paidDiv.appendChild(card);
-          } else if (order.status === "delivered") {
-            deliveredDiv.appendChild(card);
-          }
-        });
-
-        if (!pendingDiv.innerHTML) {
-          pendingDiv.innerHTML = '<div class="empty">Ingen ordre</div>';
-        }
-
-        if (!paidDiv.innerHTML) {
-          paidDiv.innerHTML = '<div class="empty">Ingen ordre</div>';
-        }
-
-        if (!deliveredDiv.innerHTML) {
-          deliveredDiv.innerHTML = '<div class="empty">Ingen ordre</div>';
-        }
-
-        if (hasNewOrder) {
-          playNewOrderSound();
-        }
-
-        knownOrderIds = currentIds;
-        firstLoadDone = true;
+        renderOrders(orders);
       } catch (err) {
         document.getElementById("debug").innerText = "Feil ved henting av ordre";
       }
+    }
+
+    function setupRealtime() {
+      if (
+        !SUPABASE_URL ||
+        !SUPABASE_PUBLISHABLE_KEY ||
+        SUPABASE_URL.includes("LIM_INN") ||
+        SUPABASE_PUBLISHABLE_KEY.includes("LIM_INN")
+      ) {
+        console.log("Realtime ikke satt opp ennå");
+        return;
+      }
+
+      const { createClient } = supabase;
+      supabaseClient = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+      supabaseClient
+        .channel("orders-db-changes")
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "orders"
+          },
+          async () => {
+            await loadOrders();
+          }
+        )
+        .subscribe((status) => {
+          console.log("Supabase realtime status:", status);
+          const debug = document.getElementById("debug");
+          if (status === "SUBSCRIBED") {
+            debug.innerText = "Realtime tilkoblet";
+            loadOrders();
+          }
+        });
     }
 
     async function toggleFullscreen() {
@@ -503,7 +546,10 @@
     document.getElementById("tvModeBtn").addEventListener("click", toggleTvMode);
 
     loadOrders();
-    setInterval(loadOrders, 5000);
+    setupRealtime();
+
+    // fallback hvis realtime ikke kobler seg opp
+    setInterval(loadOrders, 60000);
   </script>
 </body>
 </html>
