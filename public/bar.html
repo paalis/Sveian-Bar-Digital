@@ -385,15 +385,21 @@
           return;
         }
 
-        debug.innerText = `Hentet ${orders.length} ordre`;
-
         orders.sort((a, b) => a.order_number - b.order_number);
+
+        const visibleOrders = orders.filter(order =>
+          order.status === "pending_payment" ||
+          order.status === "paid" ||
+          order.status === "delivered"
+        );
+
+        debug.innerText = `Viser ${visibleOrders.length} aktive ordre`;
 
         const currentIds = new Set();
         let hasNewOrder = false;
         const now = Date.now();
 
-        orders.forEach(order => {
+        visibleOrders.forEach(order => {
           currentIds.add(order.id);
 
           if (!orderSeenTime[order.id]) {
