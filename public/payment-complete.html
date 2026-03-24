@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Betaling fullført</title>
+  <title>Betalingsstatus</title>
+
   <style>
     body{
       margin:0;
@@ -15,21 +16,29 @@
       place-items:center;
       padding:20px;
     }
+
     .card{
       width:min(560px,100%);
-      background:rgba(78,36,0,.72);
-      border:1px solid rgba(255,255,255,.14);
+      background:rgba(78,36,0,.75);
       border-radius:28px;
       padding:28px 22px;
-      box-shadow:0 18px 40px rgba(70,25,0,.28);
       text-align:center;
+      box-shadow:0 18px 40px rgba(0,0,0,.3);
     }
-    h1{margin:0 0 12px}
-    p{margin:0 0 12px;color:#f7dfbf}
+
+    h1{
+      margin:0 0 12px;
+      font-size:28px;
+    }
+
+    p{
+      margin:0 0 12px;
+      color:#f7dfbf;
+      font-size:16px;
+    }
+
     .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
+      display:inline-block;
       margin-top:16px;
       padding:14px 18px;
       border-radius:18px;
@@ -38,23 +47,69 @@
       text-decoration:none;
       font-weight:900;
     }
+
+    .success { color:#39d39f; }
+    .error { color:#ff6b6b; }
+    .pending { color:#ffd166; }
   </style>
 </head>
+
 <body>
   <div class="card">
-    <h1>Betaling registrert</h1>
-    <p id="statusText">Oppdaterer ordrestatus ...</p>
+    <h1 id="title">Sjekker betaling...</h1>
+    <p id="statusText">Vent litt mens vi oppdaterer ordren.</p>
     <a class="btn" href="/">Tilbake til forsiden</a>
   </div>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const orderNumber = params.get("order");
-    const statusText = document.getElementById("statusText");
+    async function checkOrderStatus() {
+      const params = new URLSearchParams(window.location.search);
+      const orderNumber = params.get("order");
 
-    statusText.textContent = orderNumber
-      ? `Du er tilbake fra Vipps. Ordre #${orderNumber} venter på betalingsbekreftelse.`
-      : "Du er tilbake fra Vipps. Ordren venter på betalingsbekreftelse.";
+      const title = document.getElementById("title");
+      const statusText = document.getElementById("statusText");
+
+      if (!orderNumber) {
+        title.textContent = "Fant ikke ordre";
+        statusText.textContent = "Ordrenummer mangler i URL.";
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/get-order?order=${encodeURIComponent(orderNumber)}`);
+        const order = await res.json();
+
+        if (!res.ok || !order) {
+          title.textContent = "Ordre ikke funnet";
+          statusText.textContent = `Fant ikke ordre #${orderNumber}.`;
+          return;
+        }
+
+        // 🔥 HER ER MAGIEN
+        if (order.status === "paid") {
+          title.innerHTML = '<span class="success">Betaling godkjent</span>';
+          statusText.textContent = `Ordre #${orderNumber} er registrert som betalt.`;
+        } 
+        else if (order.status === "aborted") {
+          title.innerHTML = '<span class="error">Betaling avbrutt</span>';
+          statusText.textContent = `Ordre #${orderNumber} ble avbrutt og er ikke betalt.`;
+        } 
+        else if (order.status === "delivered") {
+          title.innerHTML = '<span class="success">Ordre utlevert</span>';
+          statusText.textContent = `Ordre #${orderNumber} er allerede utlevert.`;
+        } 
+        else {
+          title.innerHTML = '<span class="pending">Venter på betaling</span>';
+          statusText.textContent = `Ordre #${orderNumber} venter fortsatt på betaling.`;
+        }
+
+      } catch (err) {
+        title.textContent = "Feil";
+        statusText.textContent = "Kunne ikke hente status.";
+      }
+    }
+
+    checkOrderStatus();
   </script>
 </body>
 </html>
