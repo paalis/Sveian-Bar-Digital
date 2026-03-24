@@ -48,13 +48,13 @@
   </div>
 
   <script>
-      const params = new URLSearchParams(window.location.search);
-      const orderNumber = params.get("order");
-      const statusText = document.getElementById("statusText");
+    const params = new URLSearchParams(window.location.search);
+    const orderNumber = params.get("order");
+    const statusText = document.getElementById("statusText");
 
-      statusText.textContent = orderNumber
-        ? `Du er tilbake fra Vipps. Ordre #${orderNumber} venter på endelig betalingsbekreftelse.`
-        : "Du er tilbake fra Vipps. Ordren venter på endelig betalingsbekreftelse.";
+    statusText.textContent = orderNumber
+      ? `Du er tilbake fra Vipps. Ordre #${orderNumber} venter på betalingsbekreftelse.`
+      : "Du er tilbake fra Vipps. Ordren venter på betalingsbekreftelse.";
   </script>
 </body>
 </html>
