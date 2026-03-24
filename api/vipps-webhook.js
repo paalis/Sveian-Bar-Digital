@@ -12,6 +12,8 @@ export default async function handler(req, res) {
     }
 
     const event = req.body || {};
+    console.log("VIPPS WEBHOOK EVENT:", JSON.stringify(event, null, 2));
+
     const eventName = event.name || "";
     const resource = event.resource || {};
     const reference = resource.reference || event.reference || "";
@@ -20,7 +22,6 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, ignored: "missing reference" });
     }
 
-    // reference er nå på formen: sveian-123-17123456789
     const match = String(reference).match(/^sveian-(\d+)-/);
     const orderNumber = match ? Number(match[1]) : null;
 
@@ -30,12 +31,9 @@ export default async function handler(req, res) {
 
     let newStatus = null;
 
-    // Tilpass disse etter hvilke events Vipps faktisk sender for din ePayment-flyt
     if (
       eventName.includes("authorized") ||
-      eventName.includes("captured") ||
-      eventName.includes("sale.completed") ||
-      eventName.includes("payment.captured")
+      eventName.includes("captured")
     ) {
       newStatus = "paid";
     } else if (
