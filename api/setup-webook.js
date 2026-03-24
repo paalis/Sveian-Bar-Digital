@@ -1,5 +1,9 @@
 export default async function handler(req, res) {
   try {
+    if (req.method !== "GET") {
+      return res.status(405).json({ error: "Method not allowed" });
+    }
+
     const vippsClientId = process.env.VIPPS_CLIENT_ID;
     const vippsClientSecret = process.env.VIPPS_CLIENT_SECRET;
     const vippsSubscriptionKey = process.env.VIPPS_SUBSCRIPTION_KEY;
@@ -16,7 +20,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // 1. Hent token
     const tokenRes = await fetch("https://apitest.vipps.no/accesstoken/get", {
       method: "POST",
       headers: {
@@ -29,7 +32,7 @@ export default async function handler(req, res) {
 
     const tokenData = await tokenRes.json();
 
-    if (!tokenRes.ok) {
+    if (!tokenRes.ok || !tokenData.access_token) {
       return res.status(500).json({
         error: "Kunne ikke hente token",
         details: tokenData
@@ -38,7 +41,6 @@ export default async function handler(req, res) {
 
     const accessToken = tokenData.access_token;
 
-    // 2. Opprett webhook
     const webhookRes = await fetch("https://apitest.vipps.no/webhooks/v1/webhooks", {
       method: "POST",
       headers: {
@@ -61,11 +63,17 @@ export default async function handler(req, res) {
 
     const webhookData = await webhookRes.json();
 
+    if (!webhookRes.ok) {
+      return res.status(500).json({
+        error: "Kunne ikke opprette webhook",
+        details: webhookData
+      });
+    }
+
     return res.status(200).json({
       success: true,
       webhook: webhookData
     });
-
   } catch (err) {
     return res.status(500).json({
       error: "Feil",
