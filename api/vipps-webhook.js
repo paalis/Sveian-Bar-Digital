@@ -14,14 +14,16 @@ export default async function handler(req, res) {
     const event = req.body || {};
     console.log("VIPPS WEBHOOK EVENT:", JSON.stringify(event, null, 2));
 
-    const eventName = event.name || "";
-    const resource = event.resource || {};
-    const reference = resource.reference || event.reference || "";
+    // Vipps sender reference og name på top-level
+    const reference = event.reference || "";
+    const eventName = String(event.name || "").toUpperCase();
+    const success = event.success;
 
     if (!reference) {
       return res.status(200).json({ ok: true, ignored: "missing reference" });
     }
 
+    // reference fra create-payment.js: sveian-<orderNumber>-<timestamp>
     const match = String(reference).match(/^sveian-(\d+)-/);
     const orderNumber = match ? Number(match[1]) : null;
 
@@ -31,21 +33,22 @@ export default async function handler(req, res) {
 
     let newStatus = null;
 
-    if (
-      eventName.includes("authorized") ||
-      eventName.includes("captured")
-    ) {
+    if ((eventName === "AUTHORIZED" || eventName === "CAPTURED") && success === true) {
       newStatus = "paid";
     } else if (
-      eventName.includes("aborted") ||
-      eventName.includes("cancelled") ||
-      eventName.includes("expired")
+      eventName === "ABORTED" ||
+      eventName === "CANCELLED" ||
+      eventName === "EXPIRED" ||
+      eventName === "TERMINATED"
     ) {
       newStatus = "aborted";
     }
 
     if (!newStatus) {
-      return res.status(200).json({ ok: true, ignored: eventName });
+      return res.status(200).json({
+        ok: true,
+        ignored: `Unhandled event: ${eventName}`
+      });
     }
 
     const updateRes = await fetch(
@@ -74,7 +77,8 @@ export default async function handler(req, res) {
     return res.status(200).json({
       ok: true,
       orderNumber,
-      status: newStatus
+      status: newStatus,
+      eventName
     });
   } catch (err) {
     return res.status(500).json({
