@@ -12,20 +12,32 @@ export default async function handler(req, res) {
     }
 
     const event = req.body || {};
-    console.log("VIPPS WEBHOOK EVENT:", JSON.stringify(event, null, 2));
+    console.log("VIPPS WEBHOOK EVENT RAW:", JSON.stringify(event, null, 2));
 
-    // Vipps sender reference og name på top-level
-    const reference = event.reference || "";
     const eventName = String(event.name || "").toUpperCase();
-    const success = event.success;
+
+    const reference =
+      event.reference ||
+      event.resource?.reference ||
+      event.data?.reference ||
+      "";
+
+    console.log("VIPPS WEBHOOK PARSED:", JSON.stringify({
+      eventName,
+      reference
+    }));
 
     if (!reference) {
       return res.status(200).json({ ok: true, ignored: "missing reference" });
     }
 
-    // reference fra create-payment.js: sveian-<orderNumber>-<timestamp>
     const match = String(reference).match(/^sveian-(\d+)-/);
     const orderNumber = match ? Number(match[1]) : null;
+
+    console.log("VIPPS WEBHOOK ORDER MATCH:", JSON.stringify({
+      reference,
+      orderNumber
+    }));
 
     if (!orderNumber) {
       return res.status(200).json({ ok: true, ignored: "unknown reference format" });
@@ -33,16 +45,24 @@ export default async function handler(req, res) {
 
     let newStatus = null;
 
-    if ((eventName === "AUTHORIZED" || eventName === "CAPTURED") && success === true) {
+    if (
+      eventName.includes("AUTHORIZED") ||
+      eventName.includes("CAPTURED")
+    ) {
       newStatus = "paid";
     } else if (
-      eventName === "ABORTED" ||
-      eventName === "CANCELLED" ||
-      eventName === "EXPIRED" ||
-      eventName === "TERMINATED"
+      eventName.includes("ABORTED") ||
+      eventName.includes("CANCELLED") ||
+      eventName.includes("EXPIRED") ||
+      eventName.includes("TERMINATED")
     ) {
       newStatus = "aborted";
     }
+
+    console.log("VIPPS WEBHOOK STATUS MAP:", JSON.stringify({
+      eventName,
+      newStatus
+    }));
 
     if (!newStatus) {
       return res.status(200).json({
@@ -51,21 +71,27 @@ export default async function handler(req, res) {
       });
     }
 
-    const updateRes = await fetch(
-      `${supabaseUrl}/rest/v1/orders?order_number=eq.${orderNumber}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": supabaseServiceRoleKey,
-          "Authorization": `Bearer ${supabaseServiceRoleKey}`,
-          "Prefer": "return=representation"
-        },
-        body: JSON.stringify({ status: newStatus })
-      }
-    );
+    const updateUrl = `${supabaseUrl}/rest/v1/orders?order_number=eq.${orderNumber}`;
+
+    const updateRes = await fetch(updateUrl, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": supabaseServiceRoleKey,
+        "Authorization": `Bearer ${supabaseServiceRoleKey}`,
+        "Prefer": "return=representation"
+      },
+      body: JSON.stringify({ status: newStatus })
+    });
 
     const updateData = await updateRes.json();
+
+    console.log("VIPPS WEBHOOK SUPABASE UPDATE:", JSON.stringify({
+      orderNumber,
+      newStatus,
+      ok: updateRes.ok,
+      updateData
+    }));
 
     if (!updateRes.ok) {
       return res.status(500).json({
@@ -77,10 +103,10 @@ export default async function handler(req, res) {
     return res.status(200).json({
       ok: true,
       orderNumber,
-      status: newStatus,
-      eventName
+      status: newStatus
     });
   } catch (err) {
+    console.log("VIPPS WEBHOOK ERROR:", String(err));
     return res.status(500).json({
       error: "Webhook-feil",
       details: String(err)
