@@ -13,27 +13,25 @@ export default async function handler(req, res) {
     const EXPIRY_MINUTES = 30;
     const cutoff = new Date(Date.now() - EXPIRY_MINUTES * 60 * 1000).toISOString();
 
-    const updateRes = await fetch(
+    const deleteRes = await fetch(
       `${supabaseUrl}/rest/v1/orders?status=eq.pending_payment&created_at=lt.${cutoff}`,
       {
-        method: "PATCH",
+        method: "DELETE",
         headers: {
-          "Content-Type": "application/json",
           "apikey": supabaseServiceRoleKey,
           "Authorization": `Bearer ${supabaseServiceRoleKey}`,
           "Prefer": "return=representation"
-        },
-        body: JSON.stringify({ status: "aborted" })
+        }
       }
     );
 
-    const updated = await updateRes.json();
+    const deleted = await deleteRes.json();
 
-    if (!updateRes.ok) {
-      return res.status(500).json({ error: "Kunne ikke rydde opp ordre", details: updated });
+    if (!deleteRes.ok) {
+      return res.status(500).json({ error: "Kunne ikke slette utløpte ordre", details: deleted });
     }
 
-    return res.status(200).json({ ok: true, expired: updated.length });
+    return res.status(200).json({ ok: true, deleted: deleted.length });
   } catch (err) {
     return res.status(500).json({ error: "Feil i cleanup", details: String(err) });
   }
