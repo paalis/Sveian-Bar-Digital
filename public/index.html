@@ -211,7 +211,7 @@
     }
 
     .icon{
-      font-size:5rem;
+      font-size:4.5rem;
       line-height:1;
       margin:8px 0 14px;
       position:relative;
@@ -552,7 +552,7 @@
       { id:"gingerjoe", icon:"/icons/gingerjoe.png", name:"Ginger Joe", price:90, category:"Drikke" },
       { id:"shots", icon:"/icons/shots.png", name:"Shots", price:50, category:"Drikke" },
       { id:"slush", icon:"/icons/slush.png", name:"Slush", price:40, category:"Drikke" },
-      { id:"brus", icon:"/icons/brus.png", name:"Brus", price:35, category:"Drikke" },
+      { id:"brus", icon:"/icons/brus.png", iconSize:"5rem", name:"Brus", price:35, category:"Drikke" },
       { id:"kaffe", icon:"/icons/kaffe.png", name:"Kaffe", price:25, category:"Drikke" },
       { id:"polse", icon:"/icons/polse.png", name:"Pølse med brød", price:40, category:"Mat" },
       { id:"vaffel", icon:"/icons/vaffel.png", name:"Hel plate vaffel", price:40, category:"Mat" },
@@ -567,7 +567,7 @@
     let searchText = "";
 
     function renderIcon(icon, size) {
-      const s = size || "5rem";
+      const s = size || "4.5rem";
       if (String(icon).startsWith("/")) {
         return `<img src="${escapeHtml(icon)}" style="width:${s};height:${s};object-fit:contain;">`;
       }
