@@ -4,6 +4,7 @@ export default async function handler(req, res) {
       return res.status(405).json({ error: "Method not allowed" });
     }
 
+    const vippsApiBaseUrl = process.env.VIPPS_API_BASE_URL || "https://apitest.vipps.no";
     const vippsClientId = process.env.VIPPS_CLIENT_ID;
     const vippsClientSecret = process.env.VIPPS_CLIENT_SECRET;
     const vippsSubscriptionKey = process.env.VIPPS_SUBSCRIPTION_KEY;
@@ -20,7 +21,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const tokenRes = await fetch("https://apitest.vipps.no/accesstoken/get", {
+    const tokenRes = await fetch(`${vippsApiBaseUrl}/accesstoken/get`, {
       method: "POST",
       headers: {
         "client_id": vippsClientId,
@@ -41,7 +42,7 @@ export default async function handler(req, res) {
 
     const accessToken = tokenData.access_token;
 
-    const webhookRes = await fetch("https://apitest.vipps.no/webhooks/v1/webhooks", {
+    const webhookRes = await fetch(`${vippsApiBaseUrl}/webhooks/v1/webhooks`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${accessToken}`,

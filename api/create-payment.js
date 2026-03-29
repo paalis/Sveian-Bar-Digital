@@ -12,6 +12,22 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Ugyldig totalbeløp" });
     }
 
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: "Ingen varer i bestillingen" });
+    }
+
+    for (const item of items) {
+      const qty = Number(item.qty);
+      if (!Number.isInteger(qty) || qty < 1 || qty > 100) {
+        return res.status(400).json({ error: "Ugyldig antall for en eller flere varer" });
+      }
+    }
+
+    const expectedTotal = items.reduce((sum, item) => sum + Number(item.price) * Number(item.qty), 0);
+    if (Math.round(expectedTotal) !== Math.round(total)) {
+      return res.status(400).json({ error: "Totalbeløp stemmer ikke med varelinjer" });
+    }
+
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -20,6 +36,7 @@ export default async function handler(req, res) {
     const vippsSubscriptionKey = process.env.VIPPS_SUBSCRIPTION_KEY;
     const vippsMerchantSerialNumber = process.env.VIPPS_MERCHANT_SERIAL_NUMBER;
     const appBaseUrl = process.env.APP_BASE_URL;
+    const vippsApiBaseUrl = process.env.VIPPS_API_BASE_URL || "https://apitest.vipps.no";
 
     if (!supabaseUrl || !supabaseServiceRoleKey) {
       return res.status(500).json({
@@ -51,7 +68,7 @@ export default async function handler(req, res) {
       body: JSON.stringify([{
         status: "pending_payment",
         total: total,
-        items_json: items
+        items_json: JSON.stringify(items)
       }])
     });
 
@@ -71,7 +88,7 @@ export default async function handler(req, res) {
     const amountInOre = Math.round(total * 100);
 
     // 2. Hent access token fra Vipps test
-    const tokenRes = await fetch("https://apitest.vipps.no/accesstoken/get", {
+    const tokenRes = await fetch(`${vippsApiBaseUrl}/accesstoken/get`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -117,7 +134,7 @@ export default async function handler(req, res) {
       paymentDescription: `Sommerfest på Sveian ordre #${orderNumber}`
     };
 
-    const vippsRes = await fetch("https://apitest.vipps.no/epayment/v1/payments", {
+    const vippsRes = await fetch(`${vippsApiBaseUrl}/epayment/v1/payments`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

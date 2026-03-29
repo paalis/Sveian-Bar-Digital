@@ -336,11 +336,18 @@
       }
     }
 
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
     function getItems(order) {
       try {
-        return typeof order.items_json === "string"
-          ? JSON.parse(order.items_json)
-          : (order.items_json || []);
+        return JSON.parse(order.items_json || "[]");
       } catch {
         return [];
       }
@@ -434,16 +441,16 @@
 
         card.innerHTML = `
           ${showNewBadge && order.status !== "delivered" ? '<div class="new-badge">NY</div>' : ''}
-          <strong>Ordre #${order.order_number}</strong>
+          <strong>Ordre #${escapeHtml(order.order_number)}</strong>
 
           <div class="items">
             ${items.length
-              ? items.map(i => `<div>• ${i.name} x ${i.qty}</div>`).join("")
+              ? items.map(i => `<div>• ${escapeHtml(i.name)} x ${escapeHtml(i.qty)}</div>`).join("")
               : '<div>Ingen varelinjer</div>'}
           </div>
 
-          <div class="total">${order.total} kr</div>
-          <div class="status">${order.status}</div>
+          <div class="total">${escapeHtml(order.total)} kr</div>
+          <div class="status">${escapeHtml(order.status)}</div>
           ${order.status === "paid" ? '<div class="hint">Trykk for å markere som utlevert</div>' : ''}
         `;
 

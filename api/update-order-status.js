@@ -7,6 +7,11 @@ export default async function handler(req, res) {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
     const { id, orderNumber, status } = body;
 
+    const ALLOWED_STATUSES = ["pending_payment", "paid", "delivered", "aborted"];
+    if (!ALLOWED_STATUSES.includes(status)) {
+      return res.status(400).json({ error: "Ugyldig status" });
+    }
+
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 

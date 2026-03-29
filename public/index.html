@@ -566,6 +566,15 @@
     let activeCategory = "Alle";
     let searchText = "";
 
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
     function formatKr(v){
       return new Intl.NumberFormat("nb-NO").format(v) + " kr";
     }
@@ -633,6 +642,9 @@
       }
 
       const totals = cartTotals();
+      const btn = document.getElementById("placeOrderBtn");
+      btn.disabled = true;
+      btn.textContent = "Bestiller...";
 
       try {
         const res = await fetch("/api/create-payment", {
@@ -648,23 +660,27 @@
 
         if (!res.ok) {
           alert((data.error || "Feil ved opprettelse av betaling.") + (data.details ? "\n\n" + JSON.stringify(data.details) : ""));
+          btn.disabled = false;
+          btn.textContent = "Bestill";
           return;
-    }
+        }
 
-        window.location.href = data.url;
+        window.location.replace(data.url);
       } catch (err) {
         alert("Klarte ikke å kontakte backend.");
+        btn.disabled = false;
+        btn.textContent = "Bestill";
       }
     }
 
     function renderCustomer(){
       const grid = document.getElementById("productGrid");
       grid.innerHTML = filteredProducts().map(p => `
-        <button class="card" type="button" onclick="addToCart('${p.id}')">
+        <button class="card" type="button" onclick="addToCart('${escapeHtml(p.id)}')">
           <div class="badge">${getCartCount(p.id)}</div>
-          <div class="icon">${p.icon}</div>
-          <div class="name">${p.name}</div>
-          <div class="meta">${p.category}</div>
+          <div class="icon">${escapeHtml(p.icon)}</div>
+          <div class="name">${escapeHtml(p.name)}</div>
+          <div class="meta">${escapeHtml(p.category)}</div>
           <div class="rowline">
             <span class="price">${formatKr(p.price)}</span>
             <span class="tap">Trykk +1</span>
@@ -675,14 +691,14 @@
       const items = cartItems();
       document.getElementById("cartList").innerHTML = items.length ? items.map(item => `
         <div class="order-row">
-          <div class="order-icon">${item.icon}</div>
+          <div class="order-icon">${escapeHtml(item.icon)}</div>
           <div>
-            <div class="order-name">${item.name}</div>
+            <div class="order-name">${escapeHtml(item.name)}</div>
             <div class="order-meta">${formatKr(item.price)} per stk</div>
             <div class="qty">
-              <button type="button" onclick="changeCart('${item.id}',-1)">−</button>
+              <button type="button" onclick="changeCart('${escapeHtml(item.id)}',-1)">−</button>
               <strong>${item.qty}</strong>
-              <button type="button" onclick="changeCart('${item.id}',1)">+</button>
+              <button type="button" onclick="changeCart('${escapeHtml(item.id)}',1)">+</button>
             </div>
           </div>
           <div class="line-total">${formatKr(item.lineTotal)}</div>

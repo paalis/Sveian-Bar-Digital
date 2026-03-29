@@ -11,6 +11,15 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Mangler Supabase env vars" });
     }
 
+    const webhookSecret = process.env.VIPPS_WEBHOOK_SECRET;
+    if (webhookSecret) {
+      const authHeader = req.headers["authorization"] || "";
+      if (authHeader !== webhookSecret) {
+        console.log("VIPPS WEBHOOK: Ugyldig signatur");
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+    }
+
     const event = req.body || {};
     console.log("VIPPS WEBHOOK EVENT RAW:", JSON.stringify(event, null, 2));
 
