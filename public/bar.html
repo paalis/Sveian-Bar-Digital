@@ -304,12 +304,21 @@
     let orderSeenTime = {};
     let firstLoadDone = false;
     let lastPaidIds = new Set();
+    let audioCtx = null;
+
+    function unlockAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      } else if (audioCtx.state === "suspended") {
+        audioCtx.resume();
+      }
+    }
 
     const NEW_DURATION = 30000;
 
     function playNewOrderSound() {
       try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        unlockAudio();
         const t = audioCtx.currentTime;
 
         // "Ka" — kort mekanisk klikk med støy
@@ -573,8 +582,8 @@
       document.body.classList.toggle("tv-mode");
     }
 
-    document.getElementById("fullscreenBtn").addEventListener("click", toggleFullscreen);
-    document.getElementById("tvModeBtn").addEventListener("click", toggleTvMode);
+    document.getElementById("fullscreenBtn").addEventListener("click", () => { unlockAudio(); toggleFullscreen(); });
+    document.getElementById("tvModeBtn").addEventListener("click", () => { unlockAudio(); toggleTvMode(); });
 
     loadOrders();
     setupRealtime();
