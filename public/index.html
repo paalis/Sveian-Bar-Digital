@@ -211,7 +211,7 @@
     }
 
     .icon{
-      font-size:4rem;
+      font-size:5rem;
       line-height:1;
       margin:8px 0 14px;
       position:relative;
@@ -536,9 +536,9 @@
 
   <script>
     const products = [
-      { id:"ticket", icon:"/icons/ticket.png", iconSize:"5rem", name:"Inngangsbillett", price:475, category:"Billetter" },
+      { id:"ticket", icon:"/icons/ticket.png", iconSize:"6.5rem", name:"Inngangsbillett", price:475, category:"Billetter" },
       { id:"shirt", icon:"/icons/tskjorte.png", name:"T-skjorte", price:200, category:"Merch" },
-      { id:"glassfee", icon:"/icons/miljoavgift.png", iconSize:"5rem", name:"Miljøavgift på glass", price:20, category:"Tillegg" },
+      { id:"glassfee", icon:"/icons/miljoavgift.png", iconSize:"6.5rem", name:"Miljøavgift på glass", price:20, category:"Tillegg" },
       { id:"dahls", icon:"/icons/dahls.png", name:"Dahls pils", price:90, category:"Drikke" },
       { id:"juicyipa", icon:"/icons/juicyipa.png", name:"Frydenlund Juicy IPA", price:90, category:"Drikke" },
       { id:"fatol", icon:"/icons/fatol.png", name:"Frydenlund fatøl", price:90, category:"Drikke" },
@@ -567,7 +567,7 @@
     let searchText = "";
 
     function renderIcon(icon, size) {
-      const s = size || "4rem";
+      const s = size || "5rem";
       if (String(icon).startsWith("/")) {
         return `<img src="${escapeHtml(icon)}" style="width:${s};height:${s};object-fit:contain;">`;
       }
