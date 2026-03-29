@@ -594,13 +594,20 @@
     function addToCart(id){
       cart[id] = getCartCount(id) + 1;
       lastAdded = id;
-      renderCustomer();
+      updateBadge(id);
+      renderCart();
     }
 
     function changeCart(id, d){
       cart[id] = Math.max(0, getCartCount(id) + d);
       if (cart[id] === 0) delete cart[id];
-      renderCustomer();
+      updateBadge(id);
+      renderCart();
+    }
+
+    function updateBadge(id) {
+      const badge = document.querySelector(`[data-product-id="${CSS.escape(id)}"] .badge`);
+      if (badge) badge.textContent = getCartCount(id);
     }
 
     function clearCart(){
@@ -681,10 +688,10 @@
       }
     }
 
-    function renderCustomer(){
+    function renderGrid(){
       const grid = document.getElementById("productGrid");
       grid.innerHTML = filteredProducts().map(p => `
-        <button class="card" type="button" onclick="addToCart('${escapeHtml(p.id)}')">
+        <button class="card" type="button" data-product-id="${escapeHtml(p.id)}" onclick="addToCart('${escapeHtml(p.id)}')">
           <div class="badge">${getCartCount(p.id)}</div>
           <div class="icon">${renderIcon(p.icon, p.iconSize)}</div>
           <div class="name">${escapeHtml(p.name)}</div>
@@ -695,7 +702,9 @@
           </div>
         </button>
       `).join("");
+    }
 
+    function renderCart(){
       const items = cartItems();
       document.getElementById("cartList").innerHTML = items.length ? items.map(item => `
         <div class="order-row">
@@ -721,6 +730,11 @@
       document.getElementById("stickyTotal").textContent = "Totalt: " + formatKr(totals.total);
     }
 
+    function renderCustomer(){
+      renderGrid();
+      renderCart();
+    }
+
     function demoOrder(){
       clearCart();
       addToCart("dahls");
@@ -731,14 +745,14 @@
 
     document.getElementById("searchInput").addEventListener("input", e => {
       searchText = e.target.value;
-      renderCustomer();
+      renderGrid();
     });
 
     document.querySelectorAll(".chip").forEach(btn => btn.addEventListener("click", () => {
       document.querySelectorAll(".chip").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       activeCategory = btn.dataset.cat;
-      renderCustomer();
+      renderGrid();
     }));
 
     document.getElementById("placeOrderBtn").addEventListener("click", placeOrder);
