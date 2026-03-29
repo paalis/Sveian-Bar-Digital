@@ -320,50 +320,28 @@
       try {
         unlockAudio();
         const t = audioCtx.currentTime;
+        const notes = [880, 1174, 1568];
+        let startAt = t;
 
-        // "Ka" — kort mekanisk klikk med støy
-        const bufferSize = audioCtx.sampleRate * 0.04;
-        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-          data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
-        }
-        const noise = audioCtx.createBufferSource();
-        noise.buffer = buffer;
-        const noiseGain = audioCtx.createGain();
-        noiseGain.gain.setValueAtTime(0.3, t);
-        noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
-        noise.connect(noiseGain);
-        noiseGain.connect(audioCtx.destination);
-        noise.start(t);
-        noise.stop(t + 0.04);
+        notes.forEach((freq) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
 
-        // "Ching" — metallisk bjelle som klinger ut
-        const bell = audioCtx.createOscillator();
-        const bellGain = audioCtx.createGain();
-        bell.type = "triangle";
-        bell.frequency.setValueAtTime(2800, t + 0.03);
-        bell.frequency.exponentialRampToValueAtTime(2200, t + 0.08);
-        bellGain.gain.setValueAtTime(0.001, t + 0.03);
-        bellGain.gain.exponentialRampToValueAtTime(0.35, t + 0.05);
-        bellGain.gain.exponentialRampToValueAtTime(0.001, t + 0.9);
-        bell.connect(bellGain);
-        bellGain.connect(audioCtx.destination);
-        bell.start(t + 0.03);
-        bell.stop(t + 0.9);
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(freq, startAt);
 
-        // Ekstra overtone for mer metallisk klang
-        const bell2 = audioCtx.createOscillator();
-        const bell2Gain = audioCtx.createGain();
-        bell2.type = "sine";
-        bell2.frequency.setValueAtTime(4200, t + 0.03);
-        bell2Gain.gain.setValueAtTime(0.001, t + 0.03);
-        bell2Gain.gain.exponentialRampToValueAtTime(0.15, t + 0.05);
-        bell2Gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
-        bell2.connect(bell2Gain);
-        bell2Gain.connect(audioCtx.destination);
-        bell2.start(t + 0.03);
-        bell2.stop(t + 0.5);
+          gain.gain.setValueAtTime(0.001, startAt);
+          gain.gain.exponentialRampToValueAtTime(0.12, startAt + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, startAt + 0.18);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc.start(startAt);
+          osc.stop(startAt + 0.18);
+
+          startAt += 0.12;
+        });
       } catch (e) {
         console.log("Lyd blokkert", e);
       }
