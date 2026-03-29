@@ -417,7 +417,7 @@
 
         const showNewBadge = firstLoadDone && (now - orderSeenTime[order.id] < NEW_DURATION);
 
-        if (order.status === "paid" && !lastPaidIds.has(order.id)) {
+        if (firstLoadDone && order.status === "paid" && !lastPaidIds.has(order.id)) {
           hasNewPaidOrder = true;
         }
 
