@@ -274,6 +274,7 @@
   <div class="top-actions">
     <button class="fullscreen-btn" id="fullscreenBtn" type="button">Fullskjerm</button>
     <button class="tv-btn" id="tvModeBtn" type="button">TV-modus</button>
+    <button class="fullscreen-btn" id="activateSound" type="button">🔔 Aktiver lyd</button>
   </div>
 
   <div class="columns">
@@ -562,6 +563,12 @@
 
     document.getElementById("fullscreenBtn").addEventListener("click", () => { unlockAudio(); toggleFullscreen(); });
     document.getElementById("tvModeBtn").addEventListener("click", () => { unlockAudio(); toggleTvMode(); });
+    document.getElementById("activateSound").addEventListener("click", () => {
+      unlockAudio();
+      playNewOrderSound();
+      document.getElementById("activateSound").textContent = "🔔 Lyd aktivert";
+      document.getElementById("activateSound").disabled = true;
+    });
 
     loadOrders();
     setupRealtime();
