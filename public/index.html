@@ -566,6 +566,13 @@
     let activeCategory = "Alle";
     let searchText = "";
 
+    function renderIcon(icon) {
+      if (String(icon).startsWith("/")) {
+        return `<img src="${escapeHtml(icon)}" style="width:2.2rem;height:2.2rem;object-fit:contain;">`;
+      }
+      return escapeHtml(icon);
+    }
+
     function escapeHtml(str) {
       return String(str)
         .replace(/&/g, "&amp;")
@@ -678,7 +685,7 @@
       grid.innerHTML = filteredProducts().map(p => `
         <button class="card" type="button" onclick="addToCart('${escapeHtml(p.id)}')">
           <div class="badge">${getCartCount(p.id)}</div>
-          <div class="icon">${escapeHtml(p.icon)}</div>
+          <div class="icon">${renderIcon(p.icon)}</div>
           <div class="name">${escapeHtml(p.name)}</div>
           <div class="meta">${escapeHtml(p.category)}</div>
           <div class="rowline">
@@ -691,7 +698,7 @@
       const items = cartItems();
       document.getElementById("cartList").innerHTML = items.length ? items.map(item => `
         <div class="order-row">
-          <div class="order-icon">${escapeHtml(item.icon)}</div>
+          <div class="order-icon">${renderIcon(item.icon)}</div>
           <div>
             <div class="order-name">${escapeHtml(item.name)}</div>
             <div class="order-meta">${formatKr(item.price)} per stk</div>
