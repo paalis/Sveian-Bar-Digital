@@ -575,6 +575,15 @@
 
     // fallback hvis realtime ikke kobler seg opp
     setInterval(loadOrders, 60000);
+
+    // rydd opp utløpte pending_payment-ordre hvert 5. minutt
+    async function cleanupExpiredOrders() {
+      try {
+        await fetch("/api/cleanup-orders", { method: "POST" });
+      } catch (e) {}
+    }
+    cleanupExpiredOrders();
+    setInterval(cleanupExpiredOrders, 5 * 60 * 1000);
   </script>
 </body>
 </html>
