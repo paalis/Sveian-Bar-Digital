@@ -528,7 +528,7 @@
   </div>
 
   <div class="sticky">
-    <div class="sticky-inner">
+    <div class="sticky-inner" onclick="document.getElementById('cartList').closest('aside').scrollIntoView({behavior:'smooth', block:'start'})" style="cursor:pointer">
       <div class="sticky-left"><span>🛒</span><span id="stickyCount">0 varer</span></div>
       <div class="sticky-total" id="stickyTotal">Totalt: 0 kr</div>
     </div>
