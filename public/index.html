@@ -538,7 +538,7 @@
     const products = [
       { id:"ticket", icon:"/icons/ticket.png", name:"Inngangsbillett", price:475, category:"Billetter" },
       { id:"shirt", icon:"/icons/tskjorte.png", name:"T-skjorte", price:200, category:"Merch" },
-      { id:"glassfee", icon:"/icons/miljoavgift.png", name:"Miljøavgift på glass", price:20, category:"Tillegg" },
+      { id:"glassfee", icon:"/icons/miljoavgift.png", iconSize:"5rem", name:"Miljøavgift på glass", price:20, category:"Tillegg" },
       { id:"dahls", icon:"/icons/dahls.png", name:"Dahls pils", price:90, category:"Drikke" },
       { id:"juicyipa", icon:"/icons/juicyipa.png", name:"Frydenlund Juicy IPA", price:90, category:"Drikke" },
       { id:"fatol", icon:"/icons/fatol.png", name:"Frydenlund fatøl", price:90, category:"Drikke" },
@@ -566,9 +566,10 @@
     let activeCategory = "Alle";
     let searchText = "";
 
-    function renderIcon(icon) {
+    function renderIcon(icon, size) {
+      const s = size || "3.5rem";
       if (String(icon).startsWith("/")) {
-        return `<img src="${escapeHtml(icon)}" style="width:3.5rem;height:3.5rem;object-fit:contain;">`;
+        return `<img src="${escapeHtml(icon)}" style="width:${s};height:${s};object-fit:contain;">`;
       }
       return escapeHtml(icon);
     }
@@ -685,7 +686,7 @@
       grid.innerHTML = filteredProducts().map(p => `
         <button class="card" type="button" onclick="addToCart('${escapeHtml(p.id)}')">
           <div class="badge">${getCartCount(p.id)}</div>
-          <div class="icon">${renderIcon(p.icon)}</div>
+          <div class="icon">${renderIcon(p.icon, p.iconSize)}</div>
           <div class="name">${escapeHtml(p.name)}</div>
           <div class="meta">${escapeHtml(p.category)}</div>
           <div class="rowline">
